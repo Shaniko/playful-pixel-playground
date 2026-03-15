@@ -57,6 +57,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           {gameId === 'pong' && '↑ ↓ to move paddle'}
           {gameId === 'breakout' && '← → to move  SPACE to launch'}
           {gameId === 'space-invaders' && '← → to move  SPACE to shoot'}
+          {gameId === 'dino-runner' && 'SPACE / TAP to jump'}
         </div>
       </div>
     </div>
