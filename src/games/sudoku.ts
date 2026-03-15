@@ -3,7 +3,7 @@
 let animId = 0;
 let stopped = false;
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   const W = 450;
   const H = 520;
   canvas.width = W;
@@ -14,8 +14,8 @@ export function start(canvas: HTMLCanvasElement) {
   const CELL = 46;
   const PAD = 18;
   const GRID = CELL * 9;
+  const holes = difficulty === 'easy' ? 35 : difficulty === 'hard' ? 55 : 45;
 
-  // Board state
   let solution: number[][] = [];
   let puzzle: number[][] = [];
   let player: number[][] = [];
@@ -65,10 +65,10 @@ export function start(canvas: HTMLCanvasElement) {
     return arr;
   }
 
-  function makePuzzle(sol: number[][], holes: number): number[][] {
+  function makePuzzle(sol: number[][], h: number): number[][] {
     const p = sol.map(r => [...r]);
     const cells = shuffle(Array.from({ length: 81 }, (_, i) => i));
-    for (let i = 0; i < holes; i++) {
+    for (let i = 0; i < h; i++) {
       const idx = cells[i];
       p[Math.floor(idx / 9)][idx % 9] = 0;
     }
@@ -77,7 +77,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   function initGame() {
     solution = generateSolution();
-    puzzle = makePuzzle(solution, 45);
+    puzzle = makePuzzle(solution, holes);
     player = puzzle.map(r => [...r]);
     fixed = puzzle.map(r => r.map(v => v !== 0));
     selR = -1;
@@ -95,7 +95,6 @@ export function start(canvas: HTMLCanvasElement) {
   function hasError(r: number, c: number): boolean {
     const v = player[r][c];
     if (v === 0) return false;
-    // Check row/col/block for duplicates
     for (let i = 0; i < 9; i++) {
       if (i !== c && player[r][i] === v) return true;
       if (i !== r && player[i][c] === v) return true;
@@ -115,39 +114,30 @@ export function start(canvas: HTMLCanvasElement) {
     const ox = PAD;
     const oy = PAD;
 
-    // Highlight selected row/col/block
     if (selR >= 0 && selC >= 0 && !won) {
       ctx.fillStyle = 'rgba(34,197,94,0.07)';
-      // Row
       ctx.fillRect(ox, oy + selR * CELL, GRID, CELL);
-      // Col
       ctx.fillRect(ox + selC * CELL, oy, CELL, GRID);
-      // Block
       const br = Math.floor(selR / 3) * 3, bc = Math.floor(selC / 3) * 3;
       ctx.fillRect(ox + bc * CELL, oy + br * CELL, CELL * 3, CELL * 3);
-      // Selected cell
       ctx.fillStyle = 'rgba(34,197,94,0.18)';
       ctx.fillRect(ox + selC * CELL, oy + selR * CELL, CELL, CELL);
     }
 
-    // Grid lines
     for (let i = 0; i <= 9; i++) {
       const thick = i % 3 === 0;
       ctx.strokeStyle = thick ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.12)';
       ctx.lineWidth = thick ? 2 : 1;
-      // Horizontal
       ctx.beginPath();
       ctx.moveTo(ox, oy + i * CELL);
       ctx.lineTo(ox + GRID, oy + i * CELL);
       ctx.stroke();
-      // Vertical
       ctx.beginPath();
       ctx.moveTo(ox + i * CELL, oy);
       ctx.lineTo(ox + i * CELL, oy + GRID);
       ctx.stroke();
     }
 
-    // Numbers
     ctx.font = '600 20px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -168,7 +158,6 @@ export function start(canvas: HTMLCanvasElement) {
       }
     }
 
-    // Win message
     if (won) {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(0, 0, W, H);
@@ -181,7 +170,6 @@ export function start(canvas: HTMLCanvasElement) {
       ctx.fillText('ENTER for new game', W / 2, H / 2 + 20);
     }
 
-    // Bottom bar – New Game button
     if (!won) {
       ctx.fillStyle = 'rgba(255,255,255,0.4)';
       ctx.font = '12px "JetBrains Mono", monospace';
@@ -192,7 +180,6 @@ export function start(canvas: HTMLCanvasElement) {
     if (!stopped) animId = requestAnimationFrame(draw);
   }
 
-  // Click handler
   function onClick(e: MouseEvent) {
     if (won) return;
     const rect = canvas.getBoundingClientRect();
@@ -236,7 +223,6 @@ export function start(canvas: HTMLCanvasElement) {
   initGame();
   draw();
 
-  // Store refs for cleanup
   (canvas as any).__sudoku_onClick = onClick;
   (canvas as any).__sudoku_onKey = onKey;
 }
@@ -244,7 +230,6 @@ export function start(canvas: HTMLCanvasElement) {
 export function stop() {
   stopped = true;
   cancelAnimationFrame(animId);
-  // Clean up event listeners using stored refs
   const canvases = document.querySelectorAll('canvas');
   canvases.forEach((c) => {
     const onClick = (c as any).__sudoku_onClick;

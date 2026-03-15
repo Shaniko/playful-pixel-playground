@@ -16,6 +16,7 @@ let clouds: { x: number; y: number; w: number }[];
 let groundOffset: number;
 let score: number, highScore: number;
 let speed: number;
+let baseSpeed: number;
 let gameOver: boolean;
 let gameOverTime: number;
 let started: boolean;
@@ -33,7 +34,7 @@ function init() {
   obstacles = [];
   groundOffset = 0;
   score = 0;
-  speed = 6;
+  speed = baseSpeed;
   gameOver = false;
   gameOverTime = 0;
   started = false;
@@ -83,27 +84,21 @@ function update() {
   if (blinkTimer > 120) { isBlinking = true; }
   if (blinkTimer > 126) { isBlinking = false; blinkTimer = 0; }
 
-  // gravity
   catVY += GRAVITY;
   catY += catVY;
   if (catY >= GROUND_Y) { catY = GROUND_Y; catVY = 0; isJumping = false; }
 
-  // ground scroll
   groundOffset = (groundOffset + speed) % 20;
 
-  // clouds
   clouds.forEach(c => { c.x -= speed * 0.3; if (c.x < -80) c.x = W + Math.random() * 100; });
 
-  // obstacles
   if (frame % Math.max(40, 90 - Math.floor(score / 200)) === 0) spawnObstacle();
   obstacles.forEach(o => o.x -= speed);
   obstacles = obstacles.filter(o => o.x > -60);
 
-  // score
   score++;
   if (score % 500 === 0) speed += 0.5;
 
-  // collision - ducking makes hitbox smaller
   const catX = 80;
   const catR = isDucking ? 10 : 18;
   const catCenterY = isDucking ? catY - 10 : catY - 18;
@@ -127,9 +122,7 @@ function update() {
 
 function drawCat(x: number, y: number, dead: boolean) {
   if (isDucking && !dead) {
-    // ducking cat - flat ellipse
     const rw = 24, rh = 10;
-    // tail
     ctx.strokeStyle = '#f59e0b';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -139,19 +132,16 @@ function drawCat(x: number, y: number, dead: boolean) {
     ctx.quadraticCurveTo(x - rw - 10, y - rh - 10 + tw, x - rw - 6, y - rh - 18);
     ctx.stroke();
 
-    // body
     ctx.fillStyle = '#f59e0b';
     ctx.beginPath();
     ctx.ellipse(x, y - rh, rw, rh, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // belly
     ctx.fillStyle = '#fde68a';
     ctx.beginPath();
     ctx.ellipse(x + 2, y - rh + 3, rw * 0.5, rh * 0.5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // ears (flattened)
     ctx.fillStyle = '#f59e0b';
     ctx.beginPath();
     ctx.moveTo(x + 12, y - rh * 2 + 2);
@@ -159,7 +149,6 @@ function drawCat(x: number, y: number, dead: boolean) {
     ctx.lineTo(x + 8, y - rh * 2 + 1);
     ctx.fill();
 
-    // eyes (squinting)
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.ellipse(x + 8, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + 18, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
@@ -167,14 +156,12 @@ function drawCat(x: number, y: number, dead: boolean) {
     ctx.beginPath(); ctx.ellipse(x + 9, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + 19, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
 
-    // nose
     ctx.fillStyle = '#f472b6';
     ctx.beginPath(); ctx.ellipse(x + 14, y - rh + 4, 2, 1.2, 0, 0, Math.PI * 2); ctx.fill();
     return;
   }
 
   const r = 18;
-  // tail
   ctx.strokeStyle = '#f59e0b';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
@@ -184,19 +171,16 @@ function drawCat(x: number, y: number, dead: boolean) {
   ctx.quadraticCurveTo(x - r - 12, y - r - 15 + tw, x - r - 8, y - r - 25);
   ctx.stroke();
 
-  // body
   ctx.fillStyle = '#f59e0b';
   ctx.beginPath();
   ctx.ellipse(x, y - r, r, r + 2, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // belly
   ctx.fillStyle = '#fde68a';
   ctx.beginPath();
   ctx.ellipse(x + 2, y - r + 5, r * 0.55, r * 0.65, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // ears
   ctx.fillStyle = '#f59e0b';
   ctx.beginPath();
   ctx.moveTo(x - 10, y - r * 2 + 4);
@@ -209,7 +193,6 @@ function drawCat(x: number, y: number, dead: boolean) {
   ctx.lineTo(x + 3, y - r * 2 + 1);
   ctx.fill();
 
-  // inner ears
   ctx.fillStyle = '#fbbf24';
   ctx.beginPath();
   ctx.moveTo(x - 9, y - r * 2 + 4);
@@ -222,7 +205,6 @@ function drawCat(x: number, y: number, dead: boolean) {
   ctx.lineTo(x + 5, y - r * 2 + 2);
   ctx.fill();
 
-  // eyes
   if (dead) {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
@@ -245,7 +227,6 @@ function drawCat(x: number, y: number, dead: boolean) {
     }
   }
 
-  // mouth
   if (!dead) {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 1.5;
@@ -267,7 +248,6 @@ function drawCat(x: number, y: number, dead: boolean) {
     });
   }
 
-  // legs
   if (!dead) {
     ctx.fillStyle = '#f59e0b';
     const legOff1 = Math.sin(legPhase) * (isJumping ? 0 : 5);
@@ -373,11 +353,12 @@ function loop() {
   animId = requestAnimationFrame(loop);
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvasRef = canvas;
   canvas.width = W;
   canvas.height = H;
+  baseSpeed = difficulty === 'easy' ? 4 : difficulty === 'hard' ? 8 : 6;
   init();
 
   keyHandler = (e: KeyboardEvent) => {
