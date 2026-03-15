@@ -168,7 +168,7 @@ function loop(time: number) {
 
 function init() {
   board = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
-  score = 0; lines = 0; level = 0; gameOver = false; lastDrop = 0;
+  score = 0; lines = 0; level = 0; gameOver = false; gameOverTime = 0; lastDrop = 0;
   newPiece();
 }
 
