@@ -20,6 +20,7 @@ function init() {
   playerScore = 0;
   aiScore = 0;
   gameOver = false;
+  gameOverTime = 0;
   keys = {};
   resetBall(1);
 }
