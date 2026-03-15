@@ -111,7 +111,7 @@ export function start(canvas: HTMLCanvasElement) {
   init();
 
   keyHandler = (e: KeyboardEvent) => {
-    if (gameOver) { if (e.key === 'Enter') init(); return; }
+    if (gameOver) { if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) init(); return; }
     switch (e.key) {
       case 'ArrowUp': if (dir.y === 0) nextDir = { x: 0, y: -1 }; break;
       case 'ArrowDown': if (dir.y === 0) nextDir = { x: 0, y: 1 }; break;

@@ -128,7 +128,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     keys[e.key] = true;
-    if (gameOver && e.key === 'Enter') init();
+    if (gameOver && e.key === 'Enter' && Date.now() - gameOverTime > 1000) init();
     if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };

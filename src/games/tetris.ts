@@ -180,7 +180,9 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     if (gameOver) {
-      if (e.key === 'Enter') { init(); }
+      if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) { init(); }
+      return;
+    }
       return;
     }
     switch (e.key) {
