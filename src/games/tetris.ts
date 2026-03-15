@@ -20,6 +20,7 @@ let score: number;
 let lines: number;
 let level: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let interval: number;
 let animId: number;
 let ctx: CanvasRenderingContext2D;
@@ -34,7 +35,7 @@ function newPiece() {
     x: Math.floor(COLS / 2) - Math.ceil(SHAPES[i][0].length / 2),
     y: 0,
   };
-  if (collides(piece.x, piece.y, piece.shape)) gameOver = true;
+  if (collides(piece.x, piece.y, piece.shape)) { gameOver = true; gameOverTime = Date.now(); }
 }
 
 function collides(px: number, py: number, shape: number[][]) {
@@ -167,7 +168,7 @@ function loop(time: number) {
 
 function init() {
   board = Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
-  score = 0; lines = 0; level = 0; gameOver = false; lastDrop = 0;
+  score = 0; lines = 0; level = 0; gameOver = false; gameOverTime = 0; lastDrop = 0;
   newPiece();
 }
 
@@ -179,7 +180,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     if (gameOver) {
-      if (e.key === 'Enter') { init(); }
+      if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) { init(); }
       return;
     }
     switch (e.key) {

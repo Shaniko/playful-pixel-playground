@@ -7,6 +7,7 @@ let dir: { x: number; y: number };
 let nextDir: { x: number; y: number };
 let score: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let lastMove: number;
@@ -25,6 +26,7 @@ function init() {
   nextDir = { x: 1, y: 0 };
   score = 0;
   gameOver = false;
+  gameOverTime = 0;
   lastMove = 0;
   placeFood();
 }
@@ -78,6 +80,7 @@ function update() {
 
   if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID || snake.some(s => s.x === head.x && s.y === head.y)) {
     gameOver = true;
+    gameOverTime = Date.now();
     return;
   }
 
@@ -108,7 +111,7 @@ export function start(canvas: HTMLCanvasElement) {
   init();
 
   keyHandler = (e: KeyboardEvent) => {
-    if (gameOver) { if (e.key === 'Enter') init(); return; }
+    if (gameOver) { if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) init(); return; }
     switch (e.key) {
       case 'ArrowUp': if (dir.y === 0) nextDir = { x: 0, y: -1 }; break;
       case 'ArrowDown': if (dir.y === 0) nextDir = { x: 0, y: 1 }; break;

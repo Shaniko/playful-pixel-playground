@@ -16,6 +16,7 @@ let bricks: { alive: boolean; color: string }[][];
 let score: number;
 let lives: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let launched: boolean;
@@ -25,6 +26,7 @@ function init() {
   score = 0;
   lives = 3;
   gameOver = false;
+  gameOverTime = 0;
   won = false;
   keys = {};
   launched = false;
@@ -90,13 +92,14 @@ function update() {
   // check win
   if (bricks.every(row => row.every(b => !b.alive))) {
     gameOver = true;
+    gameOverTime = Date.now();
     won = true;
   }
 
   // miss
   if (ballY > H) {
     lives--;
-    if (lives <= 0) gameOver = true;
+    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
     else resetBall();
   }
 }
@@ -170,7 +173,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     keys[e.key] = true;
-    if (gameOver && e.key === 'Enter') init();
+    if (gameOver && e.key === 'Enter' && Date.now() - gameOverTime > 1000) init();
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };

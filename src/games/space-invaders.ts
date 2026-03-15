@@ -20,6 +20,7 @@ let lastEnemyShot: number;
 let score: number;
 let lives: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let lastShot: number;
@@ -33,6 +34,7 @@ function init() {
   score = 0;
   lives = 3;
   gameOver = false;
+  gameOverTime = 0;
   won = false;
   keys = {};
   enemyDir = 1;
@@ -112,17 +114,19 @@ function update(time: number) {
     if (b.x < playerX + PLAYER_W && b.x + BULLET_W > playerX && b.y + BULLET_H > H - 45 && b.y < H - 45 + PLAYER_H) {
       b.y = H + 100;
       lives--;
-      if (lives <= 0) gameOver = true;
+      if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
     }
   });
 
   // enemies reach bottom
   if (aliveEnemies.some(e => e.y + ENEMY_H > H - 60)) {
     gameOver = true;
+    gameOverTime = Date.now();
   }
 
   if (aliveEnemies.length === 0) {
     gameOver = true;
+    gameOverTime = Date.now();
     won = true;
   }
 }
@@ -193,7 +197,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     keys[e.key] = true;
-    if (gameOver && e.key === 'Enter') init();
+    if (gameOver && e.key === 'Enter' && Date.now() - gameOverTime > 1000) init();
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };

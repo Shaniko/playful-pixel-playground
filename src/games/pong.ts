@@ -11,6 +11,7 @@ let playerY: number, aiY: number;
 let ballX: number, ballY: number, ballVX: number, ballVY: number;
 let playerScore: number, aiScore: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let keys: Record<string, boolean>;
 
 function init() {
@@ -19,6 +20,7 @@ function init() {
   playerScore = 0;
   aiScore = 0;
   gameOver = false;
+  gameOverTime = 0;
   keys = {};
   resetBall(1);
 }
@@ -65,7 +67,7 @@ function update() {
 }
 
 function checkWin() {
-  if (playerScore >= 7 || aiScore >= 7) gameOver = true;
+  if (playerScore >= 7 || aiScore >= 7) { gameOver = true; gameOverTime = Date.now(); }
 }
 
 function draw() {
@@ -126,7 +128,7 @@ export function start(canvas: HTMLCanvasElement) {
 
   keyHandler = (e: KeyboardEvent) => {
     keys[e.key] = true;
-    if (gameOver && e.key === 'Enter') init();
+    if (gameOver && e.key === 'Enter' && Date.now() - gameOverTime > 1000) init();
     if (['ArrowUp', 'ArrowDown'].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };

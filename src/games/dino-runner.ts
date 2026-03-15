@@ -6,15 +6,18 @@ const JUMP_FORCE = -12;
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
+let keyUpHandler: (e: KeyboardEvent) => void;
 let clickHandler: () => void;
+let canvasRef: HTMLCanvasElement;
 
-let catY: number, catVY: number, isJumping: boolean;
+let catY: number, catVY: number, isJumping: boolean, isDucking: boolean;
 let obstacles: { x: number; w: number; h: number; type: 'cactus' | 'bird'; birdY: number }[];
 let clouds: { x: number; y: number; w: number }[];
 let groundOffset: number;
 let score: number, highScore: number;
 let speed: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let started: boolean;
 let frame: number;
 let legPhase: number;
@@ -26,11 +29,13 @@ function init() {
   catY = GROUND_Y;
   catVY = 0;
   isJumping = false;
+  isDucking = false;
   obstacles = [];
   groundOffset = 0;
   score = 0;
   speed = 6;
   gameOver = false;
+  gameOverTime = 0;
   started = false;
   frame = 0;
   legPhase = 0;
@@ -45,12 +50,17 @@ function init() {
   }));
 }
 
+function canRestart() {
+  return gameOver && Date.now() - gameOverTime > 1000;
+}
+
 function jump() {
-  if (gameOver) { init(); started = true; return; }
+  if (gameOver) { if (canRestart()) { init(); started = true; } return; }
   if (!started) { started = true; return; }
   if (!isJumping) {
     catVY = JUMP_FORCE;
     isJumping = true;
+    isDucking = false;
   }
 }
 
@@ -93,8 +103,10 @@ function update() {
   score++;
   if (score % 500 === 0) speed += 0.5;
 
-  // collision
-  const catX = 80, catR = 18;
+  // collision - ducking makes hitbox smaller
+  const catX = 80;
+  const catR = isDucking ? 10 : 18;
+  const catCenterY = isDucking ? catY - 10 : catY - 18;
   for (const o of obstacles) {
     let ox: number, oy: number, ow: number, oh: number;
     if (o.type === 'cactus') {
@@ -102,18 +114,65 @@ function update() {
     } else {
       ox = o.x; oy = o.birdY; ow = o.w; oh = o.h;
     }
-    // circle vs rect
     const closestX = Math.max(ox, Math.min(catX, ox + ow));
-    const closestY = Math.max(oy, Math.min(catY - catR, oy + oh));
-    const dx = catX - closestX, dy = (catY - catR) - closestY;
+    const closestY = Math.max(oy, Math.min(catCenterY, oy + oh));
+    const dx = catX - closestX, dy = catCenterY - closestY;
     if (dx * dx + dy * dy < (catR - 2) * (catR - 2)) {
       gameOver = true;
+      gameOverTime = Date.now();
       if (score > highScore) { highScore = score; localStorage.setItem('dino-runner-hi', String(highScore)); }
     }
   }
 }
 
 function drawCat(x: number, y: number, dead: boolean) {
+  if (isDucking && !dead) {
+    // ducking cat - flat ellipse
+    const rw = 24, rh = 10;
+    // tail
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    const tw = Math.sin(tailPhase * 3) * 6;
+    ctx.moveTo(x - rw + 2, y - rh);
+    ctx.quadraticCurveTo(x - rw - 10, y - rh - 10 + tw, x - rw - 6, y - rh - 18);
+    ctx.stroke();
+
+    // body
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.ellipse(x, y - rh, rw, rh, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // belly
+    ctx.fillStyle = '#fde68a';
+    ctx.beginPath();
+    ctx.ellipse(x + 2, y - rh + 3, rw * 0.5, rh * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ears (flattened)
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.moveTo(x + 12, y - rh * 2 + 2);
+    ctx.lineTo(x + 16, y - rh * 2 - 5);
+    ctx.lineTo(x + 8, y - rh * 2 + 1);
+    ctx.fill();
+
+    // eyes (squinting)
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(x + 8, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 18, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.ellipse(x + 9, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 19, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+
+    // nose
+    ctx.fillStyle = '#f472b6';
+    ctx.beginPath(); ctx.ellipse(x + 14, y - rh + 4, 2, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+    return;
+  }
+
   const r = 18;
   // tail
   ctx.strokeStyle = '#f59e0b';
@@ -179,7 +238,6 @@ function drawCat(x: number, y: number, dead: boolean) {
     ctx.fillStyle = '#222';
     ctx.beginPath(); ctx.ellipse(x - 5, y - r - 1, 2.5, eyeH > 1 ? 3 : 0.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + 9, y - r - 1, 2.5, eyeH > 1 ? 3 : 0.5, 0, 0, Math.PI * 2); ctx.fill();
-    // eye shine
     if (!isBlinking) {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(x - 4, y - r - 3, 1.2, 0, Math.PI * 2); ctx.fill();
@@ -199,10 +257,8 @@ function drawCat(x: number, y: number, dead: boolean) {
     ctx.moveTo(x, y - r + 7);
     ctx.quadraticCurveTo(x + 5, y - r + 12, x + 8, y - r + 9);
     ctx.stroke();
-    // nose
     ctx.fillStyle = '#f472b6';
     ctx.beginPath(); ctx.ellipse(x, y - r + 6, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-    // whiskers
     ctx.strokeStyle = '#aaa';
     ctx.lineWidth = 0.8;
     [-1, 1].forEach(s => {
@@ -211,15 +267,13 @@ function drawCat(x: number, y: number, dead: boolean) {
     });
   }
 
-  // legs (animated)
+  // legs
   if (!dead) {
     ctx.fillStyle = '#f59e0b';
     const legOff1 = Math.sin(legPhase) * (isJumping ? 0 : 5);
     const legOff2 = Math.sin(legPhase + Math.PI) * (isJumping ? 0 : 5);
-    // front legs
     ctx.fillRect(x + 5, y - 2 + legOff1, 5, 10 - legOff1);
     ctx.fillRect(x - 2, y - 2 + legOff2, 5, 10 - legOff2);
-    // paws
     ctx.fillStyle = '#fde68a';
     ctx.beginPath(); ctx.arc(x + 7.5, y + 8, 3, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(x + 0.5, y + 8, 3, 0, Math.PI * 2); ctx.fill();
@@ -229,10 +283,8 @@ function drawCat(x: number, y: number, dead: boolean) {
 function drawCactus(o: { x: number; w: number; h: number }) {
   ctx.fillStyle = '#22c55e';
   ctx.fillRect(o.x, GROUND_Y - o.h, o.w, o.h);
-  // arms
   ctx.fillRect(o.x - 5, GROUND_Y - o.h * 0.7, 6, o.h * 0.3);
   ctx.fillRect(o.x + o.w - 1, GROUND_Y - o.h * 0.6, 6, o.h * 0.25);
-  // spines
   ctx.strokeStyle = '#16a34a';
   ctx.lineWidth = 1;
   for (let i = 0; i < 4; i++) {
@@ -246,18 +298,15 @@ function drawBird(o: { x: number; birdY: number }) {
   const wingY = Math.sin(frame * 0.2) * 6;
   ctx.fillStyle = '#8b5cf6';
   ctx.beginPath(); ctx.ellipse(o.x + 14, o.birdY, 14, 8, 0, 0, Math.PI * 2); ctx.fill();
-  // wing
   ctx.beginPath();
   ctx.moveTo(o.x + 10, o.birdY);
   ctx.lineTo(o.x + 5, o.birdY - 12 + wingY);
   ctx.lineTo(o.x + 20, o.birdY);
   ctx.fill();
-  // eye
   ctx.fillStyle = '#fff';
   ctx.beginPath(); ctx.arc(o.x + 22, o.birdY - 2, 3, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#222';
   ctx.beginPath(); ctx.arc(o.x + 23, o.birdY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
-  // beak
   ctx.fillStyle = '#f59e0b';
   ctx.beginPath(); ctx.moveTo(o.x + 28, o.birdY); ctx.lineTo(o.x + 34, o.birdY + 2); ctx.lineTo(o.x + 28, o.birdY + 4); ctx.fill();
 }
@@ -266,18 +315,15 @@ function draw() {
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, 0, W, H);
 
-  // clouds
   ctx.fillStyle = '#1a1a2e';
   clouds.forEach(c => {
     ctx.beginPath(); ctx.ellipse(c.x, c.y, c.w * 0.5, 10, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(c.x + 15, c.y - 5, c.w * 0.3, 8, 0, 0, Math.PI * 2); ctx.fill();
   });
 
-  // ground
   ctx.strokeStyle = '#333';
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 10); ctx.lineTo(W, GROUND_Y + 10); ctx.stroke();
-  // ground dots
   ctx.fillStyle = '#333';
   for (let i = -1; i < W / 20 + 1; i++) {
     const dx = i * 20 - groundOffset;
@@ -285,16 +331,13 @@ function draw() {
     ctx.fillRect(dx + 10, GROUND_Y + 20, 1, 1);
   }
 
-  // obstacles
   for (const o of obstacles) {
     if (o.type === 'cactus') drawCactus(o);
     else drawBird(o);
   }
 
-  // cat
   drawCat(80, catY, gameOver);
 
-  // HUD
   ctx.fillStyle = '#22c55e';
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'right';
@@ -317,7 +360,9 @@ function draw() {
     ctx.fillStyle = '#aaa';
     ctx.font = '400 14px "JetBrains Mono", monospace';
     ctx.fillText(`Score: ${score}`, W / 2, H / 2);
-    ctx.fillText('Press SPACE to restart', W / 2, H / 2 + 25);
+    const canR = canRestart();
+    ctx.fillStyle = canR ? '#aaa' : '#555';
+    ctx.fillText(canR ? 'Press SPACE to restart' : 'Wait...', W / 2, H / 2 + 25);
   }
 }
 
@@ -330,16 +375,22 @@ function loop() {
 
 export function start(canvas: HTMLCanvasElement) {
   ctx = canvas.getContext('2d')!;
+  canvasRef = canvas;
   canvas.width = W;
   canvas.height = H;
   init();
 
   keyHandler = (e: KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'ArrowUp') { jump(); e.preventDefault(); }
-    if (e.key === 'Enter' && gameOver) { init(); started = true; }
+    if (e.key === 'ArrowDown') { isDucking = true; e.preventDefault(); }
+    if (e.key === 'Enter' && canRestart()) { init(); started = true; }
+  };
+  keyUpHandler = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowDown') isDucking = false;
   };
   clickHandler = () => jump();
   window.addEventListener('keydown', keyHandler);
+  window.addEventListener('keyup', keyUpHandler);
   canvas.addEventListener('click', clickHandler);
   animId = requestAnimationFrame(loop);
 }
@@ -347,4 +398,6 @@ export function start(canvas: HTMLCanvasElement) {
 export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
+  window.removeEventListener('keyup', keyUpHandler);
+  canvasRef?.removeEventListener('click', clickHandler);
 }
