@@ -183,8 +183,6 @@ export function start(canvas: HTMLCanvasElement) {
       if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) { init(); }
       return;
     }
-      return;
-    }
     switch (e.key) {
       case 'ArrowLeft': if (!collides(piece.x - 1, piece.y, piece.shape)) piece.x--; break;
       case 'ArrowRight': if (!collides(piece.x + 1, piece.y, piece.shape)) piece.x++; break;
