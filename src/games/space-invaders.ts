@@ -121,6 +121,7 @@ function update(time: number) {
   // enemies reach bottom
   if (aliveEnemies.some(e => e.y + ENEMY_H > H - 60)) {
     gameOver = true;
+    gameOverTime = Date.now();
   }
 
   if (aliveEnemies.length === 0) {
