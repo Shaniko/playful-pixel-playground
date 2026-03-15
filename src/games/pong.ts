@@ -11,6 +11,7 @@ let playerY: number, aiY: number;
 let ballX: number, ballY: number, ballVX: number, ballVY: number;
 let playerScore: number, aiScore: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let keys: Record<string, boolean>;
 
 function init() {

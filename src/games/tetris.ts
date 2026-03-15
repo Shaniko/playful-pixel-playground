@@ -20,6 +20,7 @@ let score: number;
 let lines: number;
 let level: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let interval: number;
 let animId: number;
 let ctx: CanvasRenderingContext2D;

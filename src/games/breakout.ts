@@ -16,6 +16,7 @@ let bricks: { alive: boolean; color: string }[][];
 let score: number;
 let lives: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let launched: boolean;

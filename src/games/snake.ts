@@ -7,6 +7,7 @@ let dir: { x: number; y: number };
 let nextDir: { x: number; y: number };
 let score: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let lastMove: number;

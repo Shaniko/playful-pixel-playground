@@ -20,6 +20,7 @@ let lastEnemyShot: number;
 let score: number;
 let lives: number;
 let gameOver: boolean;
+let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let lastShot: number;
