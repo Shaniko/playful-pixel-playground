@@ -67,7 +67,7 @@ function update() {
 }
 
 function checkWin() {
-  if (playerScore >= 7 || aiScore >= 7) gameOver = true;
+  if (playerScore >= 7 || aiScore >= 7) { gameOver = true; gameOverTime = Date.now(); }
 }
 
 function draw() {
