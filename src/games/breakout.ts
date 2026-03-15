@@ -20,6 +20,7 @@ let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let launched: boolean;
+let ballBaseSpeed: number;
 
 function init() {
   paddleX = W / 2 - PADDLE_W / 2;
@@ -44,8 +45,8 @@ function init() {
 
 function resetBall() {
   launched = false;
-  ballVX = 4;
-  ballVY = -4;
+  ballVX = ballBaseSpeed;
+  ballVY = -ballBaseSpeed;
 }
 
 function update() {
@@ -67,13 +68,11 @@ function update() {
   if (ballX <= BALL_R || ballX >= W - BALL_R) ballVX = -ballVX;
   if (ballY <= BALL_R) ballVY = -ballVY;
 
-  // paddle
   if (ballY + BALL_R >= H - 30 - PADDLE_H && ballY + BALL_R <= H - 30 && ballX >= paddleX && ballX <= paddleX + PADDLE_W) {
     ballVY = -Math.abs(ballVY);
     ballVX += (ballX - (paddleX + PADDLE_W / 2)) * 0.08;
   }
 
-  // bricks
   const offX = (W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
   const offY = 50;
   for (let r = 0; r < BRICK_ROWS; r++) {
@@ -89,14 +88,12 @@ function update() {
     }
   }
 
-  // check win
   if (bricks.every(row => row.every(b => !b.alive))) {
     gameOver = true;
     gameOverTime = Date.now();
     won = true;
   }
 
-  // miss
   if (ballY > H) {
     lives--;
     if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
@@ -108,7 +105,6 @@ function draw() {
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, 0, W, H);
 
-  // bricks
   const offX = (W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
   const offY = 50;
   for (let r = 0; r < BRICK_ROWS; r++) {
@@ -119,17 +115,14 @@ function draw() {
     }
   }
 
-  // paddle
   ctx.fillStyle = '#22c55e';
   ctx.fillRect(paddleX, H - 30 - PADDLE_H, PADDLE_W, PADDLE_H);
 
-  // ball
   ctx.fillStyle = '#fff';
   ctx.beginPath();
   ctx.arc(ballX, ballY, BALL_R, 0, Math.PI * 2);
   ctx.fill();
 
-  // HUD
   ctx.fillStyle = '#22c55e';
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
@@ -165,10 +158,11 @@ function loop() {
   animId = requestAnimationFrame(loop);
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvas.width = W;
   canvas.height = H;
+  ballBaseSpeed = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4;
   init();
 
   keyHandler = (e: KeyboardEvent) => {

@@ -5,8 +5,9 @@ let keyUpHandler: (e: KeyboardEvent) => void;
 
 const W = 700, H = 500;
 const PADDLE_W = 12, PADDLE_H = 80, BALL_R = 8;
-const PADDLE_SPEED = 6, AI_SPEED = 4;
+const PADDLE_SPEED = 6;
 
+let aiSpeed: number;
 let playerY: number, aiY: number;
 let ballX: number, ballY: number, ballVX: number, ballVY: number;
 let playerScore: number, aiScore: number;
@@ -35,23 +36,19 @@ function resetBall(dir: number) {
 function update() {
   if (gameOver) return;
 
-  // player
   if (keys['ArrowUp']) playerY = Math.max(0, playerY - PADDLE_SPEED);
   if (keys['ArrowDown']) playerY = Math.min(H - PADDLE_H, playerY + PADDLE_SPEED);
 
-  // AI
   const aiCenter = aiY + PADDLE_H / 2;
-  if (aiCenter < ballY - 10) aiY += AI_SPEED;
-  else if (aiCenter > ballY + 10) aiY -= AI_SPEED;
+  if (aiCenter < ballY - 10) aiY += aiSpeed;
+  else if (aiCenter > ballY + 10) aiY -= aiSpeed;
   aiY = Math.max(0, Math.min(H - PADDLE_H, aiY));
 
-  // ball
   ballX += ballVX;
   ballY += ballVY;
 
   if (ballY <= BALL_R || ballY >= H - BALL_R) ballVY = -ballVY;
 
-  // paddle collision
   if (ballX - BALL_R <= 30 + PADDLE_W && ballY >= playerY && ballY <= playerY + PADDLE_H && ballVX < 0) {
     ballVX = -ballVX * 1.05;
     ballVY += (ballY - (playerY + PADDLE_H / 2)) * 0.15;
@@ -61,7 +58,6 @@ function update() {
     ballVY += (ballY - (aiY + PADDLE_H / 2)) * 0.15;
   }
 
-  // score
   if (ballX < 0) { aiScore++; checkWin(); resetBall(1); }
   if (ballX > W) { playerScore++; checkWin(); resetBall(-1); }
 }
@@ -74,26 +70,22 @@ function draw() {
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, 0, W, H);
 
-  // center line
   ctx.setLineDash([8, 8]);
   ctx.strokeStyle = '#222';
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
   ctx.setLineDash([]);
 
-  // paddles
   ctx.fillStyle = '#22c55e';
   ctx.fillRect(30, playerY, PADDLE_W, PADDLE_H);
   ctx.fillStyle = '#3b82f6';
   ctx.fillRect(W - 30 - PADDLE_W, aiY, PADDLE_W, PADDLE_H);
 
-  // ball
   ctx.fillStyle = '#fff';
   ctx.beginPath();
   ctx.arc(ballX, ballY, BALL_R, 0, Math.PI * 2);
   ctx.fill();
 
-  // score
   ctx.font = '700 36px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
   ctx.fillStyle = '#22c55e';
@@ -120,10 +112,11 @@ function loop() {
   animId = requestAnimationFrame(loop);
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvas.width = W;
   canvas.height = H;
+  aiSpeed = difficulty === 'easy' ? 2.5 : difficulty === 'hard' ? 5.5 : 4;
   init();
 
   keyHandler = (e: KeyboardEvent) => {

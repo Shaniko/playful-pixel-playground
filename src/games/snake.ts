@@ -12,6 +12,7 @@ let ctx: CanvasRenderingContext2D;
 let animId: number;
 let lastMove: number;
 let keyHandler: (e: KeyboardEvent) => void;
+let baseDifficulty: 'easy' | 'medium' | 'hard';
 
 function placeFood() {
   do {
@@ -39,7 +40,6 @@ function draw() {
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, 0, W, H);
 
-  // grid bg
   ctx.fillStyle = '#111';
   ctx.fillRect(offX, offY, GRID * CELL, GRID * CELL);
 
@@ -70,7 +70,7 @@ function draw() {
     ctx.font = '400 16px "JetBrains Mono", monospace';
     ctx.fillStyle = '#aaa';
     ctx.fillText(`Score: ${score}`, W / 2, H / 2 + 15);
-    ctx.fillText('Press ENTER to restart', W / 2, H / 2 + 45);
+    ctx.fillText('Press SPACE or ENTER to restart', W / 2, H / 2 + 45);
   }
 }
 
@@ -95,7 +95,8 @@ function update() {
 
 function loop(time: number) {
   if (!ctx) return;
-  const speed = Math.max(60, 150 - score);
+  const baseSpeed = baseDifficulty === 'easy' ? 200 : baseDifficulty === 'hard' ? 100 : 150;
+  const speed = Math.max(60, baseSpeed - score);
   if (!gameOver && time - lastMove > speed) {
     update();
     lastMove = time;
@@ -104,19 +105,20 @@ function loop(time: number) {
   animId = requestAnimationFrame(loop);
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvas.width = 500;
   canvas.height = 500;
+  baseDifficulty = difficulty;
   init();
 
   keyHandler = (e: KeyboardEvent) => {
-    if (gameOver) { if (e.key === 'Enter' && Date.now() - gameOverTime > 1000) init(); return; }
+    if (gameOver) { if ((e.key === 'Enter' || e.key === ' ') && Date.now() - gameOverTime > 1000) init(); return; }
     switch (e.key) {
-      case 'ArrowUp': if (dir.y === 0) nextDir = { x: 0, y: -1 }; break;
-      case 'ArrowDown': if (dir.y === 0) nextDir = { x: 0, y: 1 }; break;
-      case 'ArrowLeft': if (dir.x === 0) nextDir = { x: -1, y: 0 }; break;
-      case 'ArrowRight': if (dir.x === 0) nextDir = { x: 1, y: 0 }; break;
+      case 'ArrowUp': nextDir = { x: 0, y: -1 }; break;
+      case 'ArrowDown': nextDir = { x: 0, y: 1 }; break;
+      case 'ArrowLeft': nextDir = { x: -1, y: 0 }; break;
+      case 'ArrowRight': nextDir = { x: 1, y: 0 }; break;
     }
     e.preventDefault();
   };

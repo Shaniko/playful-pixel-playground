@@ -21,11 +21,11 @@ let lines: number;
 let level: number;
 let gameOver: boolean;
 let gameOverTime: number;
-let interval: number;
 let animId: number;
 let ctx: CanvasRenderingContext2D;
 let lastDrop: number;
 let keyHandler: (e: KeyboardEvent) => void;
+let baseDifficulty: 'easy' | 'medium' | 'hard';
 
 function newPiece() {
   const i = Math.floor(Math.random() * SHAPES.length);
@@ -47,12 +47,6 @@ function collides(px: number, py: number, shape: number[][]) {
 }
 
 function merge() {
-  piece.shape.forEach((row, r) =>
-    row.forEach((v, c) => {
-      if (v && piece.y + r >= 0) board[piece.y + r][piece.x + c] = 1;
-    })
-  );
-  // store color
   piece.shape.forEach((row, r) =>
     row.forEach((v, c) => {
       if (v && piece.y + r >= 0) (board as any)[piece.y + r][piece.x + c] = piece.color;
@@ -95,7 +89,6 @@ function draw() {
   const offX = (W - COLS * BLOCK) / 2;
   const offY = (H - ROWS * BLOCK) / 2;
 
-  // grid
   ctx.strokeStyle = '#1a1a1a';
   ctx.lineWidth = 0.5;
   for (let r = 0; r <= ROWS; r++) {
@@ -105,7 +98,6 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(offX + c * BLOCK, offY); ctx.lineTo(offX + c * BLOCK, offY + ROWS * BLOCK); ctx.stroke();
   }
 
-  // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       if (board[r][c]) {
@@ -113,7 +105,6 @@ function draw() {
         ctx.fillRect(offX + c * BLOCK + 1, offY + r * BLOCK + 1, BLOCK - 2, BLOCK - 2);
       }
 
-  // piece
   if (piece)
     piece.shape.forEach((row, r) =>
       row.forEach((v, c) => {
@@ -124,7 +115,6 @@ function draw() {
       })
     );
 
-  // HUD
   ctx.fillStyle = '#22c55e';
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
@@ -150,7 +140,8 @@ function draw() {
 function loop(time: number) {
   if (!ctx) return;
   if (!gameOver) {
-    const speed = Math.max(100, 800 - level * 70);
+    const baseSpeed = baseDifficulty === 'easy' ? 1000 : baseDifficulty === 'hard' ? 500 : 800;
+    const speed = Math.max(100, baseSpeed - level * 70);
     if (time - lastDrop > speed) {
       if (!collides(piece.x, piece.y + 1, piece.shape)) {
         piece.y++;
@@ -172,10 +163,11 @@ function init() {
   newPiece();
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvas.width = 800;
   canvas.height = 700;
+  baseDifficulty = difficulty;
   init();
 
   keyHandler = (e: KeyboardEvent) => {

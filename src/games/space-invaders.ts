@@ -24,6 +24,7 @@ let gameOverTime: number;
 let won: boolean;
 let keys: Record<string, boolean>;
 let lastShot: number;
+let baseEnemySpeed: number;
 
 const ECOLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6'];
 
@@ -38,7 +39,7 @@ function init() {
   won = false;
   keys = {};
   enemyDir = 1;
-  enemySpeed = 800;
+  enemySpeed = baseEnemySpeed;
   lastEnemyMove = 0;
   lastEnemyShot = 0;
   lastShot = 0;
@@ -68,11 +69,9 @@ function update(time: number) {
     lastShot = time;
   }
 
-  // bullets
   bullets = bullets.filter(b => { b.y -= 8; return b.y > 0; });
   enemyBullets = enemyBullets.filter(b => { b.y += 5; return b.y < H; });
 
-  // enemy move
   if (time - lastEnemyMove > enemySpeed) {
     let hitEdge = false;
     enemies.forEach(e => {
@@ -88,7 +87,6 @@ function update(time: number) {
     lastEnemyMove = time;
   }
 
-  // enemy shoot
   const aliveEnemies = enemies.filter(e => e.alive);
   if (time - lastEnemyShot > 1200 && aliveEnemies.length > 0) {
     const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
@@ -96,7 +94,6 @@ function update(time: number) {
     lastEnemyShot = time;
   }
 
-  // bullet-enemy collision
   bullets.forEach(b => {
     enemies.forEach(e => {
       if (!e.alive) return;
@@ -109,7 +106,6 @@ function update(time: number) {
     });
   });
 
-  // enemy bullet-player
   enemyBullets.forEach(b => {
     if (b.x < playerX + PLAYER_W && b.x + BULLET_W > playerX && b.y + BULLET_H > H - 45 && b.y < H - 45 + PLAYER_H) {
       b.y = H + 100;
@@ -118,7 +114,6 @@ function update(time: number) {
     }
   });
 
-  // enemies reach bottom
   if (aliveEnemies.some(e => e.y + ENEMY_H > H - 60)) {
     gameOver = true;
     gameOverTime = Date.now();
@@ -135,18 +130,15 @@ function draw() {
   ctx.fillStyle = '#09090b';
   ctx.fillRect(0, 0, W, H);
 
-  // enemies
   enemies.forEach(e => {
     if (!e.alive) return;
     ctx.fillStyle = e.color;
     ctx.fillRect(e.x, e.y, ENEMY_W, ENEMY_H);
-    // eyes
     ctx.fillStyle = '#09090b';
     ctx.fillRect(e.x + 8, e.y + 6, 4, 4);
     ctx.fillRect(e.x + ENEMY_W - 12, e.y + 6, 4, 4);
   });
 
-  // player
   ctx.fillStyle = '#22c55e';
   ctx.beginPath();
   ctx.moveTo(playerX + PLAYER_W / 2, H - 50);
@@ -154,13 +146,11 @@ function draw() {
   ctx.lineTo(playerX + PLAYER_W, H - 50 + PLAYER_H);
   ctx.fill();
 
-  // bullets
   ctx.fillStyle = '#22c55e';
   bullets.forEach(b => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
   ctx.fillStyle = '#ef4444';
   enemyBullets.forEach(b => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
 
-  // HUD
   ctx.fillStyle = '#22c55e';
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
@@ -189,10 +179,11 @@ function loop(time: number) {
   animId = requestAnimationFrame(loop);
 }
 
-export function start(canvas: HTMLCanvasElement) {
+export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvas.width = W;
   canvas.height = H;
+  baseEnemySpeed = difficulty === 'easy' ? 1100 : difficulty === 'hard' ? 500 : 800;
   init();
 
   keyHandler = (e: KeyboardEvent) => {
