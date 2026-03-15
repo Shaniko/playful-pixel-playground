@@ -99,7 +99,7 @@ function update() {
   // miss
   if (ballY > H) {
     lives--;
-    if (lives <= 0) gameOver = true;
+    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
     else resetBall();
   }
 }
