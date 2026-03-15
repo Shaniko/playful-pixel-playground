@@ -20,6 +20,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
         case 'breakout': mod = await import('@/games/breakout'); break;
         case 'space-invaders': mod = await import('@/games/space-invaders'); break;
         case 'dino-runner': mod = await import('@/games/dino-runner'); break;
+        case 'sudoku': mod = await import('@/games/sudoku'); break;
         default: return;
       }
       mod.start(canvasRef.current);
@@ -41,23 +42,26 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative flex flex-col items-center gap-4">
+        {/* Close button – top right, visible & tappable on mobile */}
         <button
           onClick={onClose}
-          className="absolute -top-10 right-0 text-sm font-mono text-muted-foreground hover:text-primary transition-colors"
+          className="absolute -top-12 right-0 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
-          ESC to exit
+          <span className="text-xs font-mono hidden sm:inline">ESC</span>
+          <span className="text-2xl leading-none font-light">✕</span>
         </button>
         <canvas
           ref={canvasRef}
           className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
         />
-        <div className="text-xs text-muted-foreground font-mono">
+        <div className="text-xs text-muted-foreground font-mono text-center">
           {gameId === 'tetris' && '← → Move  ↑ Rotate  ↓ Soft drop  SPACE Hard drop'}
           {gameId === 'snake' && '← → ↑ ↓ to move'}
           {gameId === 'pong' && '↑ ↓ to move paddle'}
           {gameId === 'breakout' && '← → to move  SPACE to launch'}
           {gameId === 'space-invaders' && '← → to move  SPACE to shoot'}
-          {gameId === 'dino-runner' && 'SPACE / TAP to jump'}
+          {gameId === 'dino-runner' && 'SPACE / TAP to jump  ↓ to duck'}
+          {gameId === 'sudoku' && 'Click cell + type 1-9  DELETE to clear  Arrow keys to navigate'}
         </div>
       </div>
     </div>

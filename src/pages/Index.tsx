@@ -8,6 +8,7 @@ const games = [
   { id: "breakout", name: "Breakout", genre: "Action", emoji: "💥", desc: "Smash all bricks" },
   { id: "space-invaders", name: "Space Invaders", genre: "Shooter", emoji: "👾", desc: "Defend Earth" },
   { id: "dino-runner", name: "Dino Run", genre: "Runner", emoji: "🐱", desc: "Jump, run, survive!" },
+  { id: "sudoku", name: "Sudoku", genre: "Puzzle", emoji: "🔢", desc: "Fill the 9×9 grid" },
 ];
 
 const Index = () => {
@@ -15,7 +16,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <header className="pt-16 pb-10 text-center">
         <h1
           className="text-4xl md:text-5xl font-bold tracking-tight text-foreground"
@@ -26,7 +26,6 @@ const Index = () => {
         <p className="mt-3 text-muted-foreground text-sm font-mono">Select a game to play</p>
       </header>
 
-      {/* Game Grid */}
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl w-full">
           {games.map((game) => (
@@ -35,7 +34,9 @@ const Index = () => {
               onClick={() => setActiveGame(game.id)}
               className="group relative bg-card rounded-2xl p-6 text-center transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_-12px_hsl(142,71%,45%,0.25)] border-0 outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className="text-4xl block mb-3">{game.emoji}</span>
+              <span className="text-4xl block mb-3 transition-transform duration-200 group-hover:animate-wiggle">
+                {game.emoji}
+              </span>
               <h2
                 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors"
                 style={{ fontFamily: '"JetBrains Mono", monospace' }}
@@ -51,7 +52,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Game Overlay */}
       {activeGame && <GameOverlay gameId={activeGame} onClose={() => setActiveGame(null)} />}
     </div>
   );
