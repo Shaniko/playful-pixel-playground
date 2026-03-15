@@ -92,6 +92,7 @@ function update() {
   // check win
   if (bricks.every(row => row.every(b => !b.alive))) {
     gameOver = true;
+    gameOverTime = Date.now();
     won = true;
   }
 
