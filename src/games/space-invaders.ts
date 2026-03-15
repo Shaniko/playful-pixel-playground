@@ -126,6 +126,7 @@ function update(time: number) {
 
   if (aliveEnemies.length === 0) {
     gameOver = true;
+    gameOverTime = Date.now();
     won = true;
   }
 }
