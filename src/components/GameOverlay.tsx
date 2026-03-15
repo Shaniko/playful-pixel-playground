@@ -19,6 +19,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
         case 'pong': mod = await import('@/games/pong'); break;
         case 'breakout': mod = await import('@/games/breakout'); break;
         case 'space-invaders': mod = await import('@/games/space-invaders'); break;
+        case 'dino-runner': mod = await import('@/games/dino-runner'); break;
         default: return;
       }
       mod.start(canvasRef.current);
@@ -56,6 +57,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           {gameId === 'pong' && '↑ ↓ to move paddle'}
           {gameId === 'breakout' && '← → to move  SPACE to launch'}
           {gameId === 'space-invaders' && '← → to move  SPACE to shoot'}
+          {gameId === 'dino-runner' && 'SPACE / TAP to jump'}
         </div>
       </div>
     </div>
