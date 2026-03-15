@@ -114,7 +114,7 @@ function update(time: number) {
     if (b.x < playerX + PLAYER_W && b.x + BULLET_W > playerX && b.y + BULLET_H > H - 45 && b.y < H - 45 + PLAYER_H) {
       b.y = H + 100;
       lives--;
-      if (lives <= 0) gameOver = true;
+      if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
     }
   });
 
