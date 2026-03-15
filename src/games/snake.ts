@@ -26,6 +26,7 @@ function init() {
   nextDir = { x: 1, y: 0 };
   score = 0;
   gameOver = false;
+  gameOverTime = 0;
   lastMove = 0;
   placeFood();
 }
