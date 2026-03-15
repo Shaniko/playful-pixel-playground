@@ -26,6 +26,7 @@ function init() {
   score = 0;
   lives = 3;
   gameOver = false;
+  gameOverTime = 0;
   won = false;
   keys = {};
   launched = false;
