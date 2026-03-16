@@ -1,3 +1,5 @@
+import { sfxJump, sfxDie } from './sfx';
+
 const W = 600, H = 250;
 const GROUND_Y = H - 50;
 const GRAVITY = 0.6;
