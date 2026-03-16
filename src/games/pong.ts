@@ -62,8 +62,8 @@ function update() {
     sfxHit();
   }
 
-  if (ballX < 0) { aiScore++; checkWin(); resetBall(1); }
-  if (ballX > W) { playerScore++; checkWin(); resetBall(-1); }
+  if (ballX < 0) { aiScore++; sfxScore(); checkWin(); resetBall(1); }
+  if (ballX > W) { playerScore++; sfxScore(); checkWin(); resetBall(-1); }
 }
 
 function checkWin() {
