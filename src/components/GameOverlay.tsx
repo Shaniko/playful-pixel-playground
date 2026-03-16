@@ -108,7 +108,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           {gameId === 'breakout' && '← → to move  SPACE to launch'}
           {gameId === 'space-invaders' && '← → to move  SPACE to shoot'}
           {gameId === 'dino-runner' && 'SPACE / TAP to jump  ↓ to duck'}
-          {gameId === 'sudoku' && 'Click cell + 1-9 · DELETE clear · H for hint'}
+          {/* sudoku has built-in instructions on canvas */}
         </div>
       </div>
     </div>
