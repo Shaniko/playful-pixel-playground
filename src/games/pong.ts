@@ -3,7 +3,7 @@ let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
 let keyUpHandler: (e: KeyboardEvent) => void;
 
-const W = 700, H = 500;
+const W = 550, H = 400;
 const PADDLE_W = 12, PADDLE_H = 80, BALL_R = 8;
 const PADDLE_SPEED = 6;
 
