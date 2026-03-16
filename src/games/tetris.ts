@@ -1,3 +1,5 @@
+import { sfxScore, sfxDie, sfxMove } from './sfx';
+
 const COLS = 10;
 const ROWS = 20;
 const BLOCK = 22;
