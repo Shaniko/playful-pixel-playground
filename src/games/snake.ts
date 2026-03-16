@@ -115,10 +115,10 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   keyHandler = (e: KeyboardEvent) => {
     if (gameOver) { if ((e.key === 'Enter' || e.key === ' ') && Date.now() - gameOverTime > 1000) init(); return; }
     switch (e.key) {
-      case 'ArrowUp': nextDir = { x: 0, y: -1 }; break;
-      case 'ArrowDown': nextDir = { x: 0, y: 1 }; break;
-      case 'ArrowLeft': nextDir = { x: -1, y: 0 }; break;
-      case 'ArrowRight': nextDir = { x: 1, y: 0 }; break;
+      case 'ArrowUp': if (dir.y !== 1) nextDir = { x: 0, y: -1 }; break;
+      case 'ArrowDown': if (dir.y !== -1) nextDir = { x: 0, y: 1 }; break;
+      case 'ArrowLeft': if (dir.x !== 1) nextDir = { x: -1, y: 0 }; break;
+      case 'ArrowRight': if (dir.x !== -1) nextDir = { x: 1, y: 0 }; break;
     }
     e.preventDefault();
   };
