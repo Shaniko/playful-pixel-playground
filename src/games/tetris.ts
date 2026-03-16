@@ -165,8 +165,8 @@ function init() {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
-  canvas.width = 400;
-  canvas.height = 520;
+  canvas.width = 380;
+  canvas.height = 500;
   baseDifficulty = difficulty;
   init();
 
