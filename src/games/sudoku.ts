@@ -291,6 +291,34 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       useHint();
       return;
     }
+
+    // Arrow navigation — works even on fixed cells and when no cell is selected
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (selR < 0 || selC < 0) { selR = 0; selC = 0; return; }
+      if (e.key === 'ArrowUp' && selR > 0) selR--;
+      else if (e.key === 'ArrowDown' && selR < 8) selR++;
+      else if (e.key === 'ArrowLeft' && selC > 0) selC--;
+      else if (e.key === 'ArrowRight' && selC < 8) selC++;
+      return;
+    }
+
+    // Tab / Shift+Tab — cycle through cells
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (selR < 0 || selC < 0) { selR = 0; selC = 0; return; }
+      if (e.shiftKey) {
+        selC--;
+        if (selC < 0) { selC = 8; selR--; }
+        if (selR < 0) { selR = 8; selC = 8; }
+      } else {
+        selC++;
+        if (selC > 8) { selC = 0; selR++; }
+        if (selR > 8) { selR = 0; selC = 0; }
+      }
+      return;
+    }
+
     if (selR < 0 || selC < 0 || won) return;
     if (fixed[selR][selC]) return;
 
@@ -300,10 +328,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       if (checkWin()) { won = true; sfxWin(); }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       player[selR][selC] = 0;
-    } else if (e.key === 'ArrowUp' && selR > 0) { selR--; }
-    else if (e.key === 'ArrowDown' && selR < 8) { selR++; }
-    else if (e.key === 'ArrowLeft' && selC > 0) { selC--; }
-    else if (e.key === 'ArrowRight' && selC < 8) { selC++; }
+    }
   }
 
   canvas.addEventListener('click', onClick);
