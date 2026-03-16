@@ -1,3 +1,5 @@
+import { sfxEat, sfxDie } from './sfx';
+
 const GRID = 20;
 const CELL = 20;
 
