@@ -93,12 +93,14 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           <span className="text-xs opacity-50 hidden sm:inline">(ESC)</span>
         </button>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center gap-2 pb-4 min-h-0">
-        <canvas
-          ref={canvasRef}
-          className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
-          style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 100px)', objectFit: 'contain' }}
-        />
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 pb-4 min-h-0 w-full">
+        <div className="flex-1 min-h-0 flex items-center justify-center w-full px-4">
+          <canvas
+            ref={canvasRef}
+            className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
+            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+          />
+        </div>
         <div className="text-xs text-muted-foreground font-mono text-center shrink-0">
           {gameId === 'tetris' && '← → Move  ↑ Rotate  ↓ Soft drop  SPACE Hard drop'}
           {gameId === 'snake' && '← → ↑ ↓ to move'}
