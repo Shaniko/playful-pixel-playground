@@ -1,4 +1,5 @@
 // Sudoku game – canvas-based, 9x9 grid with backtracking generator
+import { sfxClick, sfxHint, sfxWin } from './sfx';
 
 let animId = 0;
 let stopped = false;
