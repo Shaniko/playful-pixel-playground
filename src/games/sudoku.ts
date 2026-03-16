@@ -5,7 +5,7 @@ let stopped = false;
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   const W = 450;
-  const H = 520;
+  const H = 560;
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
@@ -16,6 +16,10 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   const GRID = CELL * 9;
   const holes = difficulty === 'easy' ? 35 : difficulty === 'hard' ? 55 : 45;
 
+  // Hint button dimensions
+  const HINT_BTN = { x: W / 2 - 50, y: PAD + GRID + 45, w: 100, h: 34 };
+  let hintsUsed = 0;
+
   let solution: number[][] = [];
   let puzzle: number[][] = [];
   let player: number[][] = [];
@@ -23,6 +27,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   let selR = -1;
   let selC = -1;
   let won = false;
+  let hintFlash = -1; // timestamp of last hint flash
 
   function generateSolution(): number[][] {
     const board = Array.from({ length: 9 }, () => Array(9).fill(0));
@@ -83,6 +88,27 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     selR = -1;
     selC = -1;
     won = false;
+    hintsUsed = 0;
+    hintFlash = -1;
+  }
+
+  function useHint() {
+    if (won) return;
+    // Find all cells that are empty or wrong
+    const candidates: [number, number][] = [];
+    for (let r = 0; r < 9; r++)
+      for (let c = 0; c < 9; c++)
+        if (!fixed[r][c] && player[r][c] !== solution[r][c])
+          candidates.push([r, c]);
+    if (candidates.length === 0) return;
+    const [r, c] = candidates[Math.floor(Math.random() * candidates.length)];
+    player[r][c] = solution[r][c];
+    fixed[r][c] = true; // lock it in
+    selR = r;
+    selC = c;
+    hintsUsed++;
+    hintFlash = Date.now();
+    if (checkWin()) won = true;
   }
 
   function checkWin(): boolean {
@@ -114,6 +140,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     const ox = PAD;
     const oy = PAD;
 
+    // Highlight selected row/col/block
     if (selR >= 0 && selC >= 0 && !won) {
       ctx.fillStyle = 'rgba(34,197,94,0.07)';
       ctx.fillRect(ox, oy + selR * CELL, GRID, CELL);
@@ -124,6 +151,14 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.fillRect(ox + selC * CELL, oy + selR * CELL, CELL, CELL);
     }
 
+    // Hint flash effect
+    if (hintFlash > 0 && Date.now() - hintFlash < 600 && selR >= 0 && selC >= 0) {
+      const alpha = 0.3 * (1 - (Date.now() - hintFlash) / 600);
+      ctx.fillStyle = `rgba(34,197,94,${alpha})`;
+      ctx.fillRect(ox + selC * CELL, oy + selR * CELL, CELL, CELL);
+    }
+
+    // Grid lines
     for (let i = 0; i <= 9; i++) {
       const thick = i % 3 === 0;
       ctx.strokeStyle = thick ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.12)';
@@ -138,6 +173,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.stroke();
     }
 
+    // Numbers
     ctx.font = '600 20px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -158,6 +194,40 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       }
     }
 
+    // Hint button (below grid)
+    if (!won) {
+      const isHover = (canvas as any).__hintHover;
+      ctx.fillStyle = isHover ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.08)';
+      ctx.strokeStyle = 'rgba(34,197,94,0.5)';
+      ctx.lineWidth = 1.5;
+      const r = 8;
+      ctx.beginPath();
+      ctx.moveTo(HINT_BTN.x + r, HINT_BTN.y);
+      ctx.lineTo(HINT_BTN.x + HINT_BTN.w - r, HINT_BTN.y);
+      ctx.arcTo(HINT_BTN.x + HINT_BTN.w, HINT_BTN.y, HINT_BTN.x + HINT_BTN.w, HINT_BTN.y + r, r);
+      ctx.lineTo(HINT_BTN.x + HINT_BTN.w, HINT_BTN.y + HINT_BTN.h - r);
+      ctx.arcTo(HINT_BTN.x + HINT_BTN.w, HINT_BTN.y + HINT_BTN.h, HINT_BTN.x + HINT_BTN.w - r, HINT_BTN.y + HINT_BTN.h, r);
+      ctx.lineTo(HINT_BTN.x + r, HINT_BTN.y + HINT_BTN.h);
+      ctx.arcTo(HINT_BTN.x, HINT_BTN.y + HINT_BTN.h, HINT_BTN.x, HINT_BTN.y + HINT_BTN.h - r, r);
+      ctx.lineTo(HINT_BTN.x, HINT_BTN.y + r);
+      ctx.arcTo(HINT_BTN.x, HINT_BTN.y, HINT_BTN.x + r, HINT_BTN.y, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.font = '600 13px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`💡 HINT (${hintsUsed})`, W / 2, HINT_BTN.y + HINT_BTN.h / 2);
+
+      // Instructions text
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '11px "JetBrains Mono", monospace';
+      ctx.fillText('Click cell + 1-9 · DELETE clear · H hint', W / 2, HINT_BTN.y + HINT_BTN.h + 20);
+    }
+
+    // Win overlay
     if (won) {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(0, 0, W, H);
@@ -167,26 +237,27 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.fillText('YOU WIN!', W / 2, H / 2 - 20);
       ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.font = '14px "JetBrains Mono", monospace';
-      ctx.fillText('ENTER for new game', W / 2, H / 2 + 20);
-    }
-
-    if (!won) {
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.font = '12px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('Click a cell, type 1-9, DELETE to clear', W / 2, oy + GRID + 30);
+      ctx.fillText(hintsUsed > 0 ? `Hints used: ${hintsUsed}` : 'No hints used! 🏆', W / 2, H / 2 + 15);
+      ctx.fillText('ENTER for new game', W / 2, H / 2 + 40);
     }
 
     if (!stopped) animId = requestAnimationFrame(draw);
   }
 
   function onClick(e: MouseEvent) {
-    if (won) return;
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width;
     const sy = canvas.height / rect.height;
     const mx = (e.clientX - rect.left) * sx;
     const my = (e.clientY - rect.top) * sy;
+
+    // Check hint button click
+    if (!won && mx >= HINT_BTN.x && mx <= HINT_BTN.x + HINT_BTN.w && my >= HINT_BTN.y && my <= HINT_BTN.y + HINT_BTN.h) {
+      useHint();
+      return;
+    }
+
+    if (won) return;
     const c = Math.floor((mx - PAD) / CELL);
     const r = Math.floor((my - PAD) / CELL);
     if (r >= 0 && r < 9 && c >= 0 && c < 9) {
@@ -198,9 +269,25 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     }
   }
 
+  function onMouseMove(e: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * sx;
+    const my = (e.clientY - rect.top) * sy;
+    const over = !won && mx >= HINT_BTN.x && mx <= HINT_BTN.x + HINT_BTN.w && my >= HINT_BTN.y && my <= HINT_BTN.y + HINT_BTN.h;
+    (canvas as any).__hintHover = over;
+    canvas.style.cursor = over ? 'pointer' : 'default';
+  }
+
   function onKey(e: KeyboardEvent) {
     if (e.key === 'Enter' && won) {
       initGame();
+      return;
+    }
+    // H key for hint
+    if ((e.key === 'h' || e.key === 'H') && !won) {
+      useHint();
       return;
     }
     if (selR < 0 || selC < 0 || won) return;
@@ -218,12 +305,14 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   }
 
   canvas.addEventListener('click', onClick);
+  canvas.addEventListener('mousemove', onMouseMove);
   window.addEventListener('keydown', onKey);
 
   initGame();
   draw();
 
   (canvas as any).__sudoku_onClick = onClick;
+  (canvas as any).__sudoku_onMouseMove = onMouseMove;
   (canvas as any).__sudoku_onKey = onKey;
 }
 
@@ -233,8 +322,10 @@ export function stop() {
   const canvases = document.querySelectorAll('canvas');
   canvases.forEach((c) => {
     const onClick = (c as any).__sudoku_onClick;
+    const onMouseMove = (c as any).__sudoku_onMouseMove;
     const onKey = (c as any).__sudoku_onKey;
     if (onClick) c.removeEventListener('click', onClick);
+    if (onMouseMove) c.removeEventListener('mousemove', onMouseMove);
     if (onKey) window.removeEventListener('keydown', onKey);
   });
 }

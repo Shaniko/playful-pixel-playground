@@ -83,18 +83,20 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col items-center gap-4">
+    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200 overflow-auto">
+      <div className="w-full max-w-3xl px-4 pt-4 pb-2">
         <button
           onClick={onClose}
-          className="absolute -top-12 left-0 flex items-center gap-2 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all font-mono text-sm"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all font-mono text-sm z-[60]"
         >
           ← BACK
           <span className="text-xs opacity-50 hidden sm:inline">(ESC)</span>
         </button>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 pb-6">
         <canvas
           ref={canvasRef}
-          className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
+          className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)] max-w-full"
         />
         <div className="text-xs text-muted-foreground font-mono text-center">
           {gameId === 'tetris' && '← → Move  ↑ Rotate  ↓ Soft drop  SPACE Hard drop'}
@@ -103,7 +105,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           {gameId === 'breakout' && '← → to move  SPACE to launch'}
           {gameId === 'space-invaders' && '← → to move  SPACE to shoot'}
           {gameId === 'dino-runner' && 'SPACE / TAP to jump  ↓ to duck'}
-          {gameId === 'sudoku' && 'Click cell + type 1-9  DELETE to clear  Arrow keys to navigate'}
+          {gameId === 'sudoku' && 'Click cell + 1-9 · DELETE clear · H for hint'}
         </div>
       </div>
     </div>
