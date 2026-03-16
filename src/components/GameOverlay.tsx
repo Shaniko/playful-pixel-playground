@@ -83,22 +83,23 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200 overflow-auto">
-      <div className="w-full max-w-3xl px-4 pt-4 pb-2">
+    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
+      <div className="w-full max-w-3xl px-4 pt-3 pb-1 shrink-0">
         <button
           onClick={onClose}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all font-mono text-sm z-[60]"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all font-mono text-sm"
         >
           ← BACK
           <span className="text-xs opacity-50 hidden sm:inline">(ESC)</span>
         </button>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 pb-6">
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 pb-4 min-h-0">
         <canvas
           ref={canvasRef}
-          className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)] max-w-full"
+          className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
+          style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 100px)', objectFit: 'contain' }}
         />
-        <div className="text-xs text-muted-foreground font-mono text-center">
+        <div className="text-xs text-muted-foreground font-mono text-center shrink-0">
           {gameId === 'tetris' && '← → Move  ↑ Rotate  ↓ Soft drop  SPACE Hard drop'}
           {gameId === 'snake' && '← → ↑ ↓ to move'}
           {gameId === 'pong' && '↑ ↓ to move paddle'}
