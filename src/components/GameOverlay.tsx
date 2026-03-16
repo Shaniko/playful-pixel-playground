@@ -104,7 +104,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
           <canvas
             ref={canvasRef}
             className="rounded-2xl shadow-[0_0_60px_-15px_hsl(142,71%,45%,0.2)]"
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+            style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto' }}
           />
         </div>
         <div className="text-xs text-muted-foreground font-mono text-center shrink-0">
