@@ -1,6 +1,6 @@
 const COLS = 10;
 const ROWS = 20;
-const BLOCK = 30;
+const BLOCK = 22;
 
 const COLORS = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 
@@ -165,8 +165,8 @@ function init() {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
-  canvas.width = 800;
-  canvas.height = 700;
+  canvas.width = 380;
+  canvas.height = 500;
   baseDifficulty = difficulty;
   init();
 

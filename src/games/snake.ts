@@ -107,8 +107,8 @@ function loop(time: number) {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
-  canvas.width = 500;
-  canvas.height = 500;
+  canvas.width = 440;
+  canvas.height = 440;
   baseDifficulty = difficulty;
   init();
 

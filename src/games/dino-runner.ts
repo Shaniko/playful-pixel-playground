@@ -1,4 +1,4 @@
-const W = 800, H = 300;
+const W = 600, H = 250;
 const GROUND_Y = H - 50;
 const GRAVITY = 0.6;
 const JUMP_FORCE = -12;
