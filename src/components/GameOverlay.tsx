@@ -62,7 +62,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
   // Difficulty selection screen
   if (difficulty === null) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background backdrop-blur-sm animate-in fade-in duration-200">
         <div className="relative flex flex-col items-center gap-8">
           <button
             onClick={onClose}
