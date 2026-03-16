@@ -4,15 +4,15 @@ let animId = 0;
 let stopped = false;
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
-  const W = 450;
-  const H = 560;
+  const W = 420;
+  const H = 500;
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
   stopped = false;
 
-  const CELL = 46;
-  const PAD = 18;
+  const CELL = 42;
+  const PAD = 12;
   const GRID = CELL * 9;
   const holes = difficulty === 'easy' ? 35 : difficulty === 'hard' ? 55 : 45;
 
