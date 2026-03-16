@@ -69,6 +69,7 @@ function update(time: number) {
   if (keys[' '] && time - lastShot > 250) {
     bullets.push({ x: playerX + PLAYER_W / 2 - BULLET_W / 2, y: H - 50 });
     lastShot = time;
+    sfxShoot();
   }
 
   bullets = bullets.filter(b => { b.y -= 8; return b.y > 0; });
