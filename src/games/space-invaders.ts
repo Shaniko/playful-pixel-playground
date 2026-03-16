@@ -105,6 +105,7 @@ function update(time: number) {
         b.y = -100;
         score += 100;
         enemySpeed = Math.max(200, enemySpeed - 20);
+        sfxBreak();
       }
     });
   });
