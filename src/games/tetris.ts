@@ -37,7 +37,7 @@ function newPiece() {
     x: Math.floor(COLS / 2) - Math.ceil(SHAPES[i][0].length / 2),
     y: 0,
   };
-  if (collides(piece.x, piece.y, piece.shape)) { gameOver = true; gameOverTime = Date.now(); }
+  if (collides(piece.x, piece.y, piece.shape)) { gameOver = true; gameOverTime = Date.now(); sfxDie(); }
 }
 
 function collides(px: number, py: number, shape: number[][]) {
