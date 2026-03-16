@@ -1,4 +1,5 @@
 import { sfxHit, sfxBreak, sfxDie, sfxWin } from './sfx';
+import { getTheme } from './theme';
 
 let ctx: CanvasRenderingContext2D;
 let animId: number;
@@ -107,7 +108,8 @@ function update() {
 }
 
 function draw() {
-  ctx.fillStyle = '#09090b';
+  const t = getTheme();
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
   const offX = (W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
@@ -120,15 +122,15 @@ function draw() {
     }
   }
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.fillRect(paddleX, H - 30 - PADDLE_H, PADDLE_W, PADDLE_H);
 
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = t.ball;
   ctx.beginPath();
   ctx.arc(ballX, ballY, BALL_R, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillText(`SCORE: ${score}`, 15, 25);
@@ -136,20 +138,20 @@ function draw() {
   ctx.fillText(`LIVES: ${'♥'.repeat(lives)}`, W - 15, 25);
 
   if (!launched && !gameOver) {
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 14px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE to launch', W / 2, H - 5);
   }
 
   if (gameOver) {
-    ctx.fillStyle = 'rgba(9,9,11,0.85)';
+    ctx.fillStyle = t.overlay;
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = won ? '#22c55e' : '#ef4444';
     ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText(won ? 'YOU WIN!' : 'GAME OVER', W / 2, H / 2 - 20);
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 16px "JetBrains Mono", monospace';
     ctx.fillText(`Score: ${score}`, W / 2, H / 2 + 15);
     ctx.fillText('Press ENTER to restart', W / 2, H / 2 + 45);

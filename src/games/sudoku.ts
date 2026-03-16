@@ -1,5 +1,6 @@
 // Sudoku game – canvas-based, 9x9 grid with backtracking generator
 import { sfxClick, sfxHint, sfxWin } from './sfx';
+import { getTheme } from './theme';
 
 let animId = 0;
 let stopped = false;
@@ -28,7 +29,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   let selR = -1;
   let selC = -1;
   let won = false;
-  let hintFlash = -1; // timestamp of last hint flash
+  let hintFlash = -1;
 
   function generateSolution(): number[][] {
     const board = Array.from({ length: 9 }, () => Array(9).fill(0));
@@ -95,7 +96,6 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
   function useHint() {
     if (won) return;
-    // Find all cells that are empty or wrong
     const candidates: [number, number][] = [];
     for (let r = 0; r < 9; r++)
       for (let c = 0; c < 9; c++)
@@ -104,7 +104,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (candidates.length === 0) return;
     const [r, c] = candidates[Math.floor(Math.random() * candidates.length)];
     player[r][c] = solution[r][c];
-    fixed[r][c] = true; // lock it in
+    fixed[r][c] = true;
     selR = r;
     selC = c;
     hintsUsed++;
@@ -135,8 +135,9 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   }
 
   function draw() {
+    const t = getTheme();
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#0a0a0a';
+    ctx.fillStyle = t.bg;
     ctx.fillRect(0, 0, W, H);
 
     const ox = PAD;
@@ -144,12 +145,12 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
     // Highlight selected row/col/block
     if (selR >= 0 && selC >= 0 && !won) {
-      ctx.fillStyle = 'rgba(34,197,94,0.07)';
+      ctx.fillStyle = t.primarySoft;
       ctx.fillRect(ox, oy + selR * CELL, GRID, CELL);
       ctx.fillRect(ox + selC * CELL, oy, CELL, GRID);
       const br = Math.floor(selR / 3) * 3, bc = Math.floor(selC / 3) * 3;
       ctx.fillRect(ox + bc * CELL, oy + br * CELL, CELL * 3, CELL * 3);
-      ctx.fillStyle = 'rgba(34,197,94,0.18)';
+      ctx.fillStyle = t.primaryMid;
       ctx.fillRect(ox + selC * CELL, oy + selR * CELL, CELL, CELL);
     }
 
@@ -163,7 +164,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     // Grid lines
     for (let i = 0; i <= 9; i++) {
       const thick = i % 3 === 0;
-      ctx.strokeStyle = thick ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.12)';
+      ctx.strokeStyle = thick ? t.gridThick : t.gridThin;
       ctx.lineWidth = thick ? 2 : 1;
       ctx.beginPath();
       ctx.moveTo(ox, oy + i * CELL);
@@ -186,11 +187,11 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
         const cx = ox + c * CELL + CELL / 2;
         const cy = oy + r * CELL + CELL / 2;
         if (fixed[r][c]) {
-          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.fillStyle = t.text;
         } else if (hasError(r, c)) {
           ctx.fillStyle = '#ef4444';
         } else {
-          ctx.fillStyle = '#22c55e';
+          ctx.fillStyle = t.primary;
         }
         ctx.fillText(String(v), cx, cy);
       }
@@ -199,8 +200,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     // Hint button (below grid)
     if (!won) {
       const isHover = (canvas as any).__hintHover;
-      ctx.fillStyle = isHover ? 'rgba(34,197,94,0.2)' : 'rgba(34,197,94,0.08)';
-      ctx.strokeStyle = 'rgba(34,197,94,0.5)';
+      ctx.fillStyle = isHover ? t.primaryMid : t.primarySoft;
+      ctx.strokeStyle = t.primary;
       ctx.lineWidth = 1.5;
       const r = 8;
       ctx.beginPath();
@@ -217,27 +218,27 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#22c55e';
+      ctx.fillStyle = t.primary;
       ctx.font = '600 13px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`💡 HINT (${hintsUsed})`, W / 2, HINT_BTN.y + HINT_BTN.h / 2);
 
       // Instructions text
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillStyle = t.textFaint;
       ctx.font = '11px "JetBrains Mono", monospace';
       ctx.fillText('Click cell + 1-9 · DELETE clear · H hint', W / 2, HINT_BTN.y + HINT_BTN.h + 20);
     }
 
     // Win overlay
     if (won) {
-      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillStyle = t.overlay;
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#22c55e';
+      ctx.fillStyle = t.primary;
       ctx.font = 'bold 36px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('YOU WIN!', W / 2, H / 2 - 20);
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillStyle = t.textMuted;
       ctx.font = '14px "JetBrains Mono", monospace';
       ctx.fillText(hintsUsed > 0 ? `Hints used: ${hintsUsed}` : 'No hints used! 🏆', W / 2, H / 2 + 15);
       ctx.fillText('ENTER for new game', W / 2, H / 2 + 40);
@@ -253,7 +254,6 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     const mx = (e.clientX - rect.left) * sx;
     const my = (e.clientY - rect.top) * sy;
 
-    // Check hint button click
     if (!won && mx >= HINT_BTN.x && mx <= HINT_BTN.x + HINT_BTN.w && my >= HINT_BTN.y && my <= HINT_BTN.y + HINT_BTN.h) {
       useHint();
       return;
@@ -287,7 +287,6 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       initGame();
       return;
     }
-    // H key for hint
     if ((e.key === 'h' || e.key === 'H') && !won) {
       useHint();
       return;
