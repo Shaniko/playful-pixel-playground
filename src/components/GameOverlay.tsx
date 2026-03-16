@@ -45,6 +45,12 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
     };
   }, [gameId, difficulty]);
 
+  // Lock body scroll when overlay is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
