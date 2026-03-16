@@ -4,10 +4,10 @@ let keyHandler: (e: KeyboardEvent) => void;
 let keyUpHandler: (e: KeyboardEvent) => void;
 
 const W = 500, H = 400;
-const PADDLE_W = 100, PADDLE_H = 14;
-const BALL_R = 6;
+const PADDLE_W = 80, PADDLE_H = 12;
+const BALL_R = 5;
 const BRICK_ROWS = 5, BRICK_COLS = 10;
-const BRICK_W = 60, BRICK_H = 20, BRICK_GAP = 4;
+const BRICK_W = 44, BRICK_H = 16, BRICK_GAP = 4;
 const COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7'];
 
 let paddleX: number;
