@@ -1,4 +1,5 @@
 import { sfxShoot, sfxBreak, sfxDie, sfxWin } from './sfx';
+import { getTheme } from './theme';
 
 let ctx: CanvasRenderingContext2D;
 let animId: number;
@@ -133,31 +134,32 @@ function update(time: number) {
 }
 
 function draw() {
-  ctx.fillStyle = '#09090b';
+  const t = getTheme();
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
   enemies.forEach(e => {
     if (!e.alive) return;
     ctx.fillStyle = e.color;
     ctx.fillRect(e.x, e.y, ENEMY_W, ENEMY_H);
-    ctx.fillStyle = '#09090b';
+    ctx.fillStyle = t.bg;
     ctx.fillRect(e.x + 8, e.y + 6, 4, 4);
     ctx.fillRect(e.x + ENEMY_W - 12, e.y + 6, 4, 4);
   });
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.beginPath();
   ctx.moveTo(playerX + PLAYER_W / 2, H - 50);
   ctx.lineTo(playerX, H - 50 + PLAYER_H);
   ctx.lineTo(playerX + PLAYER_W, H - 50 + PLAYER_H);
   ctx.fill();
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   bullets.forEach(b => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
   ctx.fillStyle = '#ef4444';
   enemyBullets.forEach(b => ctx.fillRect(b.x, b.y, BULLET_W, BULLET_H));
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillText(`SCORE: ${score}`, 15, 25);
@@ -165,13 +167,13 @@ function draw() {
   ctx.fillText(`LIVES: ${'♥'.repeat(lives)}`, W - 15, 25);
 
   if (gameOver) {
-    ctx.fillStyle = 'rgba(9,9,11,0.85)';
+    ctx.fillStyle = t.overlay;
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = won ? '#22c55e' : '#ef4444';
     ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText(won ? 'VICTORY!' : 'GAME OVER', W / 2, H / 2 - 20);
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 16px "JetBrains Mono", monospace';
     ctx.fillText(`Score: ${score}`, W / 2, H / 2 + 15);
     ctx.fillText('Press ENTER to restart', W / 2, H / 2 + 45);

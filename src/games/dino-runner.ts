@@ -1,4 +1,5 @@
 import { sfxJump, sfxDie } from './sfx';
+import { getTheme } from './theme';
 
 const W = 600, H = 250;
 const GROUND_Y = H - 50;
@@ -296,19 +297,20 @@ function drawBird(o: { x: number; birdY: number }) {
 }
 
 function draw() {
-  ctx.fillStyle = '#09090b';
+  const t = getTheme();
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#1a1a2e';
+  ctx.fillStyle = t.cloud;
   clouds.forEach(c => {
     ctx.beginPath(); ctx.ellipse(c.x, c.y, c.w * 0.5, 10, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(c.x + 15, c.y - 5, c.w * 0.3, 8, 0, 0, Math.PI * 2); ctx.fill();
   });
 
-  ctx.strokeStyle = '#333';
+  ctx.strokeStyle = t.ground;
   ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 10); ctx.lineTo(W, GROUND_Y + 10); ctx.stroke();
-  ctx.fillStyle = '#333';
+  ctx.fillStyle = t.groundDot;
   for (let i = -1; i < W / 20 + 1; i++) {
     const dx = i * 20 - groundOffset;
     ctx.fillRect(dx, GROUND_Y + 14, 2, 2);
@@ -322,30 +324,30 @@ function draw() {
 
   drawCat(80, catY, gameOver);
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'right';
   ctx.fillText(`${String(score).padStart(5, '0')}`, W - 20, 30);
-  ctx.fillStyle = '#555';
+  ctx.fillStyle = t.textMuted;
   ctx.fillText(`HI ${String(highScore).padStart(5, '0')}`, W - 100, 30);
 
   if (!started) {
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 18px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE or TAP to start', W / 2, H / 2);
   }
 
   if (gameOver) {
-    ctx.fillStyle = '#22c55e';
+    ctx.fillStyle = t.hud;
     ctx.font = '700 28px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('GAME OVER', W / 2, H / 2 - 30);
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 14px "JetBrains Mono", monospace';
     ctx.fillText(`Score: ${score}`, W / 2, H / 2);
     const canR = canRestart();
-    ctx.fillStyle = canR ? '#aaa' : '#555';
+    ctx.fillStyle = canR ? t.textMuted : t.ground;
     ctx.fillText(canR ? 'Press SPACE to restart' : 'Wait...', W / 2, H / 2 + 25);
   }
 }

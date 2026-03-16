@@ -1,4 +1,5 @@
 import { sfxHit, sfxScore, sfxWin, sfxDie } from './sfx';
+import { getTheme } from './theme';
 
 let ctx: CanvasRenderingContext2D;
 let animId: number;
@@ -71,11 +72,12 @@ function checkWin() {
 }
 
 function draw() {
-  ctx.fillStyle = '#09090b';
+  const t = getTheme();
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
   ctx.setLineDash([8, 8]);
-  ctx.strokeStyle = '#222';
+  ctx.strokeStyle = t.grid;
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
   ctx.setLineDash([]);
@@ -85,7 +87,7 @@ function draw() {
   ctx.fillStyle = '#3b82f6';
   ctx.fillRect(W - 30 - PADDLE_W, aiY, PADDLE_W, PADDLE_H);
 
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = t.ball;
   ctx.beginPath();
   ctx.arc(ballX, ballY, BALL_R, 0, Math.PI * 2);
   ctx.fill();
@@ -98,12 +100,12 @@ function draw() {
   ctx.fillText(`${aiScore}`, W / 2 + 60, 50);
 
   if (gameOver) {
-    ctx.fillStyle = 'rgba(9,9,11,0.85)';
+    ctx.fillStyle = t.overlay;
     ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = playerScore >= 7 ? '#22c55e' : '#3b82f6';
     ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.fillText(playerScore >= 7 ? 'YOU WIN!' : 'AI WINS!', W / 2, H / 2 - 20);
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.font = '400 16px "JetBrains Mono", monospace';
     ctx.fillText('Press ENTER to restart', W / 2, H / 2 + 25);
   }

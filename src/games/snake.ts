@@ -1,4 +1,5 @@
 import { sfxEat, sfxDie } from './sfx';
+import { getTheme } from './theme';
 
 const GRID = 20;
 const CELL = 20;
@@ -35,14 +36,15 @@ function init() {
 }
 
 function draw() {
+  const t = getTheme();
   const W = ctx.canvas.width, H = ctx.canvas.height;
   const offX = (W - GRID * CELL) / 2;
   const offY = (H - GRID * CELL) / 2;
 
-  ctx.fillStyle = '#09090b';
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = '#111';
+  ctx.fillStyle = t.bgSub;
   ctx.fillRect(offX, offY, GRID * CELL, GRID * CELL);
 
   // food
@@ -58,19 +60,19 @@ function draw() {
   });
 
   // HUD
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
   ctx.fillText(`SCORE: ${score}`, W / 2, offY - 15);
 
   if (gameOver) {
-    ctx.fillStyle = 'rgba(9,9,11,0.85)';
+    ctx.fillStyle = t.overlay;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#22c55e';
+    ctx.fillStyle = t.hud;
     ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.fillText('GAME OVER', W / 2, H / 2 - 20);
     ctx.font = '400 16px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.fillText(`Score: ${score}`, W / 2, H / 2 + 15);
     ctx.fillText('Press SPACE or ENTER to restart', W / 2, H / 2 + 45);
   }

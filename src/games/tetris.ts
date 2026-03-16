@@ -1,4 +1,5 @@
 import { sfxScore, sfxDie, sfxMove } from './sfx';
+import { getTheme } from './theme';
 
 const COLS = 10;
 const ROWS = 20;
@@ -85,14 +86,15 @@ function rotate(shape: number[][]) {
 }
 
 function draw() {
+  const t = getTheme();
   const W = ctx.canvas.width, H = ctx.canvas.height;
-  ctx.fillStyle = '#09090b';
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
   const offX = (W - COLS * BLOCK) / 2;
   const offY = (H - ROWS * BLOCK) / 2;
 
-  ctx.strokeStyle = '#1a1a1a';
+  ctx.strokeStyle = t.gridFaint;
   ctx.lineWidth = 0.5;
   for (let r = 0; r <= ROWS; r++) {
     ctx.beginPath(); ctx.moveTo(offX, offY + r * BLOCK); ctx.lineTo(offX + COLS * BLOCK, offY + r * BLOCK); ctx.stroke();
@@ -118,7 +120,7 @@ function draw() {
       })
     );
 
-  ctx.fillStyle = '#22c55e';
+  ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillText(`SCORE: ${score}`, offX, offY - 30);
@@ -127,14 +129,14 @@ function draw() {
   ctx.fillText(`LINES: ${lines}`, offX + COLS * BLOCK, offY - 10);
 
   if (gameOver) {
-    ctx.fillStyle = 'rgba(9,9,11,0.85)';
+    ctx.fillStyle = t.overlay;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#22c55e';
+    ctx.fillStyle = t.hud;
     ctx.font = '700 32px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('GAME OVER', W / 2, H / 2 - 20);
     ctx.font = '400 16px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#aaa';
+    ctx.fillStyle = t.textMuted;
     ctx.fillText(`Score: ${score}`, W / 2, H / 2 + 15);
     ctx.fillText('Press ENTER to restart', W / 2, H / 2 + 45);
   }
