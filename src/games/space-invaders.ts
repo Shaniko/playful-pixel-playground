@@ -1,3 +1,5 @@
+import { sfxShoot, sfxBreak, sfxDie, sfxWin } from './sfx';
+
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
