@@ -73,6 +73,7 @@ function update() {
   if (ballY + BALL_R >= H - 30 - PADDLE_H && ballY + BALL_R <= H - 30 && ballX >= paddleX && ballX <= paddleX + PADDLE_W) {
     ballVY = -Math.abs(ballVY);
     ballVX += (ballX - (paddleX + PADDLE_W / 2)) * 0.08;
+    sfxHit();
   }
 
   const offX = (W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
