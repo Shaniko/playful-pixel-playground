@@ -1,5 +1,7 @@
 import { useState } from "react";
 import GameOverlay from "@/components/GameOverlay";
+import { useTheme } from "@/hooks/use-theme";
+import { Sun, Moon } from "lucide-react";
 
 const games = [
   { id: "tetris", name: "Tetris", genre: "Puzzle", emoji: "🧱", desc: "Stack and clear lines" },
@@ -13,17 +15,26 @@ const games = [
 
 const Index = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col transition-colors duration-500">
+      <button
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 z-50 p-2.5 rounded-full bg-card border border-border text-foreground hover:text-primary transition-all duration-300 hover:scale-110 shadow-lg"
+        aria-label="Toggle theme"
+      >
+        {theme === 'arcade' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      </button>
+
       <header className="pt-16 pb-10 text-center">
         <h1
-          className="text-4xl md:text-5xl font-bold tracking-tight text-foreground"
+          className="text-4xl md:text-5xl font-bold tracking-tight text-foreground transition-colors duration-500"
           style={{ fontFamily: '"JetBrains Mono", monospace' }}
         >
-          THE ARCADE<span className="text-primary">.</span>
+          THE ARCADE<span className="text-primary transition-colors duration-500">.</span>
         </h1>
-        <p className="mt-3 text-muted-foreground text-sm font-mono">Select a game to play</p>
+        <p className="mt-3 text-muted-foreground text-sm font-mono transition-colors duration-500">Select a game to play</p>
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
