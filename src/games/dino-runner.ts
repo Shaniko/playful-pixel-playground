@@ -64,6 +64,7 @@ function jump() {
     catVY = JUMP_FORCE;
     isJumping = true;
     isDucking = false;
+    sfxJump();
   }
 }
 
