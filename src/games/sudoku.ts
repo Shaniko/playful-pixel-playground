@@ -297,7 +297,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
     if (e.key >= '1' && e.key <= '9') {
       player[selR][selC] = parseInt(e.key);
-      if (checkWin()) won = true;
+      sfxClick();
+      if (checkWin()) { won = true; sfxWin(); }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       player[selR][selC] = 0;
     } else if (e.key === 'ArrowUp' && selR > 0) { selR--; }
