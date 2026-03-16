@@ -96,6 +96,7 @@ function update() {
     gameOver = true;
     gameOverTime = Date.now();
     won = true;
+    sfxWin();
   }
 
   if (ballY > H) {
