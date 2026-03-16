@@ -187,7 +187,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
         if (!collides(piece.x, piece.y, r)) piece.shape = r;
         break;
       }
-      case ' ': while (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 2; } break;
+      case ' ': while (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 2; } sfxMove(); break;
     }
     e.preventDefault();
   };

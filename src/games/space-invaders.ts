@@ -121,12 +121,14 @@ function update(time: number) {
   if (aliveEnemies.some(e => e.y + ENEMY_H > H - 60)) {
     gameOver = true;
     gameOverTime = Date.now();
+    sfxDie();
   }
 
   if (aliveEnemies.length === 0) {
     gameOver = true;
     gameOverTime = Date.now();
     won = true;
+    sfxWin();
   }
 }
 

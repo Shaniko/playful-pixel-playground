@@ -101,7 +101,7 @@ function update() {
 
   if (ballY > H) {
     lives--;
-    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
+    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); sfxDie(); }
     else resetBall();
   }
 }
