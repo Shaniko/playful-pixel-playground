@@ -43,7 +43,7 @@ const Index = () => {
             <button
               key={game.id}
               onClick={() => setActiveGame(game.id)}
-              className="group relative bg-card rounded-2xl p-6 text-center transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_-12px_hsl(142,71%,45%,0.25)] border-0 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="group relative bg-card rounded-2xl p-6 text-center transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_-12px_hsl(var(--primary)/0.25)] border border-border outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="text-4xl block mb-3 transition-transform duration-200 group-hover:animate-wiggle">
                 {game.emoji}
