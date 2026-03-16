@@ -87,6 +87,7 @@ function update() {
         bricks[r][c].alive = false;
         ballVY = -ballVY;
         score += 10 * (BRICK_ROWS - r);
+        sfxBreak();
       }
     }
   }
