@@ -109,7 +109,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     selC = c;
     hintsUsed++;
     hintFlash = Date.now();
-    if (checkWin()) won = true;
+    sfxHint();
+    if (checkWin()) { won = true; sfxWin(); }
   }
 
   function checkWin(): boolean {
