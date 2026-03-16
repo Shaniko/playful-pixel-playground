@@ -70,6 +70,7 @@ function clearLines() {
     lines += cleared;
     score += [0, 100, 300, 500, 800][cleared] * (level + 1);
     level = Math.floor(lines / 10);
+    sfxScore();
   }
 }
 
