@@ -1,3 +1,5 @@
+import { sfxShoot, sfxBreak, sfxDie, sfxWin } from './sfx';
+
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
@@ -67,6 +69,7 @@ function update(time: number) {
   if (keys[' '] && time - lastShot > 250) {
     bullets.push({ x: playerX + PLAYER_W / 2 - BULLET_W / 2, y: H - 50 });
     lastShot = time;
+    sfxShoot();
   }
 
   bullets = bullets.filter(b => { b.y -= 8; return b.y > 0; });
@@ -102,6 +105,7 @@ function update(time: number) {
         b.y = -100;
         score += 100;
         enemySpeed = Math.max(200, enemySpeed - 20);
+        sfxBreak();
       }
     });
   });
@@ -110,19 +114,21 @@ function update(time: number) {
     if (b.x < playerX + PLAYER_W && b.x + BULLET_W > playerX && b.y + BULLET_H > H - 45 && b.y < H - 45 + PLAYER_H) {
       b.y = H + 100;
       lives--;
-      if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
+      if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); sfxDie(); }
     }
   });
 
   if (aliveEnemies.some(e => e.y + ENEMY_H > H - 60)) {
     gameOver = true;
     gameOverTime = Date.now();
+    sfxDie();
   }
 
   if (aliveEnemies.length === 0) {
     gameOver = true;
     gameOverTime = Date.now();
     won = true;
+    sfxWin();
   }
 }
 

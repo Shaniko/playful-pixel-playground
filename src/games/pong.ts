@@ -1,3 +1,5 @@
+import { sfxHit, sfxScore, sfxWin, sfxDie } from './sfx';
+
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
@@ -52,18 +54,20 @@ function update() {
   if (ballX - BALL_R <= 30 + PADDLE_W && ballY >= playerY && ballY <= playerY + PADDLE_H && ballVX < 0) {
     ballVX = -ballVX * 1.05;
     ballVY += (ballY - (playerY + PADDLE_H / 2)) * 0.15;
+    sfxHit();
   }
   if (ballX + BALL_R >= W - 30 - PADDLE_W && ballY >= aiY && ballY <= aiY + PADDLE_H && ballVX > 0) {
     ballVX = -ballVX * 1.05;
     ballVY += (ballY - (aiY + PADDLE_H / 2)) * 0.15;
+    sfxHit();
   }
 
-  if (ballX < 0) { aiScore++; checkWin(); resetBall(1); }
-  if (ballX > W) { playerScore++; checkWin(); resetBall(-1); }
+  if (ballX < 0) { aiScore++; sfxScore(); checkWin(); resetBall(1); }
+  if (ballX > W) { playerScore++; sfxScore(); checkWin(); resetBall(-1); }
 }
 
 function checkWin() {
-  if (playerScore >= 7 || aiScore >= 7) { gameOver = true; gameOverTime = Date.now(); }
+  if (playerScore >= 7 || aiScore >= 7) { gameOver = true; gameOverTime = Date.now(); playerScore >= 7 ? sfxWin() : sfxDie(); }
 }
 
 function draw() {

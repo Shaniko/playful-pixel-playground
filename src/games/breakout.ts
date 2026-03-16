@@ -1,3 +1,5 @@
+import { sfxHit, sfxBreak, sfxDie, sfxWin } from './sfx';
+
 let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
@@ -71,6 +73,7 @@ function update() {
   if (ballY + BALL_R >= H - 30 - PADDLE_H && ballY + BALL_R <= H - 30 && ballX >= paddleX && ballX <= paddleX + PADDLE_W) {
     ballVY = -Math.abs(ballVY);
     ballVX += (ballX - (paddleX + PADDLE_W / 2)) * 0.08;
+    sfxHit();
   }
 
   const offX = (W - (BRICK_COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
@@ -84,6 +87,7 @@ function update() {
         bricks[r][c].alive = false;
         ballVY = -ballVY;
         score += 10 * (BRICK_ROWS - r);
+        sfxBreak();
       }
     }
   }
@@ -92,11 +96,12 @@ function update() {
     gameOver = true;
     gameOverTime = Date.now();
     won = true;
+    sfxWin();
   }
 
   if (ballY > H) {
     lives--;
-    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); }
+    if (lives <= 0) { gameOver = true; gameOverTime = Date.now(); sfxDie(); }
     else resetBall();
   }
 }

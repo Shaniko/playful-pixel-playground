@@ -1,4 +1,5 @@
 // Sudoku game – canvas-based, 9x9 grid with backtracking generator
+import { sfxClick, sfxHint, sfxWin } from './sfx';
 
 let animId = 0;
 let stopped = false;
@@ -108,7 +109,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     selC = c;
     hintsUsed++;
     hintFlash = Date.now();
-    if (checkWin()) won = true;
+    sfxHint();
+    if (checkWin()) { won = true; sfxWin(); }
   }
 
   function checkWin(): boolean {
@@ -295,7 +297,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
     if (e.key >= '1' && e.key <= '9') {
       player[selR][selC] = parseInt(e.key);
-      if (checkWin()) won = true;
+      sfxClick();
+      if (checkWin()) { won = true; sfxWin(); }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       player[selR][selC] = 0;
     } else if (e.key === 'ArrowUp' && selR > 0) { selR--; }

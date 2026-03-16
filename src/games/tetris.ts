@@ -1,3 +1,5 @@
+import { sfxScore, sfxDie, sfxMove } from './sfx';
+
 const COLS = 10;
 const ROWS = 20;
 const BLOCK = 22;
@@ -35,7 +37,7 @@ function newPiece() {
     x: Math.floor(COLS / 2) - Math.ceil(SHAPES[i][0].length / 2),
     y: 0,
   };
-  if (collides(piece.x, piece.y, piece.shape)) { gameOver = true; gameOverTime = Date.now(); }
+  if (collides(piece.x, piece.y, piece.shape)) { gameOver = true; gameOverTime = Date.now(); sfxDie(); }
 }
 
 function collides(px: number, py: number, shape: number[][]) {
@@ -68,6 +70,7 @@ function clearLines() {
     lines += cleared;
     score += [0, 100, 300, 500, 800][cleared] * (level + 1);
     level = Math.floor(lines / 10);
+    sfxScore();
   }
 }
 
@@ -184,7 +187,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
         if (!collides(piece.x, piece.y, r)) piece.shape = r;
         break;
       }
-      case ' ': while (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 2; } break;
+      case ' ': while (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 2; } sfxMove(); break;
     }
     e.preventDefault();
   };

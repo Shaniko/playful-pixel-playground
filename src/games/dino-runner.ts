@@ -1,3 +1,5 @@
+import { sfxJump, sfxDie } from './sfx';
+
 const W = 600, H = 250;
 const GROUND_Y = H - 50;
 const GRAVITY = 0.6;
@@ -62,6 +64,7 @@ function jump() {
     catVY = JUMP_FORCE;
     isJumping = true;
     isDucking = false;
+    sfxJump();
   }
 }
 
@@ -115,6 +118,7 @@ function update() {
     if (dx * dx + dy * dy < (catR - 2) * (catR - 2)) {
       gameOver = true;
       gameOverTime = Date.now();
+      sfxDie();
       if (score > highScore) { highScore = score; localStorage.setItem('dino-runner-hi', String(highScore)); }
     }
   }

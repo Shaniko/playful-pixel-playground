@@ -1,3 +1,5 @@
+import { sfxEat, sfxDie } from './sfx';
+
 const GRID = 20;
 const CELL = 20;
 
@@ -81,12 +83,14 @@ function update() {
   if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID || snake.some(s => s.x === head.x && s.y === head.y)) {
     gameOver = true;
     gameOverTime = Date.now();
+    sfxDie();
     return;
   }
 
   snake.unshift(head);
   if (head.x === food.x && head.y === food.y) {
     score += 10;
+    sfxEat();
     placeFood();
   } else {
     snake.pop();
