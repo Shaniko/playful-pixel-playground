@@ -83,6 +83,7 @@ function update() {
   if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID || snake.some(s => s.x === head.x && s.y === head.y)) {
     gameOver = true;
     gameOverTime = Date.now();
+    sfxDie();
     return;
   }
 
