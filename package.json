@@ -1,6 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "playful-pixel-playground",
   "homepage": "https://shaniko.github.io/playful-pixel-playground",
+  "base": "https://shaniko.github.io/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
