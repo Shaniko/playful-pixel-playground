@@ -147,6 +147,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   touchStartHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     if (gameOver && Date.now() - gameOverTime > 1000) init();
     // Also set initial position

@@ -238,6 +238,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   touchEndHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     if (gameOver) return;
     const touch = e.changedTouches[0];
