@@ -113,7 +113,7 @@ const GameOverlay = ({ gameId, onClose }: GameOverlayProps) => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col items-center bg-background backdrop-blur-sm animate-in fade-in duration-200 overflow-hidden" style={{ touchAction: 'none' }}>
       <div className="w-full max-w-3xl px-4 pt-3 pb-1 shrink-0">
         <button
           onClick={onClose}
