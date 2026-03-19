@@ -3,7 +3,8 @@ import { getTheme } from './theme';
 
 const COLS = 10;
 const ROWS = 20;
-const BLOCK = 22;
+const HUD_HEIGHT = 44;
+let BLOCK = 22;
 
 const COLORS = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 
@@ -98,7 +99,7 @@ function draw() {
   ctx.fillRect(0, 0, W, H);
 
   const offX = (W - COLS * BLOCK) / 2;
-  const offY = (H - ROWS * BLOCK) / 2;
+  const offY = HUD_HEIGHT;
 
   ctx.strokeStyle = t.gridFaint;
   ctx.lineWidth = 0.5;
@@ -127,12 +128,12 @@ function draw() {
     );
 
   ctx.fillStyle = t.hud;
-  ctx.font = '600 16px "JetBrains Mono", monospace';
+  ctx.font = '600 14px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(`SCORE: ${score}`, offX, offY - 30);
-  ctx.fillText(`LEVEL: ${level}`, offX, offY - 10);
+  ctx.fillText(`SCORE: ${score}`, offX, 16);
+  ctx.fillText(`LEVEL: ${level}`, offX, 34);
   ctx.textAlign = 'right';
-  ctx.fillText(`LINES: ${lines}`, offX + COLS * BLOCK, offY - 10);
+  ctx.fillText(`LINES: ${lines}`, offX + COLS * BLOCK, 16);
 
   if (gameOver) {
     ctx.fillStyle = t.overlay;
@@ -177,9 +178,19 @@ function init() {
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
   canvasRef = canvas;
-  canvas.width = 380;
-  canvas.height = 500;
   baseDifficulty = difficulty;
+
+  // Compute block size to fill canvas nicely
+  const parent = canvas.parentElement;
+  const availW = parent ? parent.clientWidth - 20 : 380;
+  const availH = parent ? parent.clientHeight - 20 : 500;
+  const blockFromW = Math.floor(availW / COLS);
+  const blockFromH = Math.floor((availH - HUD_HEIGHT) / ROWS);
+  BLOCK = Math.min(blockFromW, blockFromH, 32);
+  BLOCK = Math.max(BLOCK, 16); // minimum block size
+
+  canvas.width = COLS * BLOCK + 20;
+  canvas.height = ROWS * BLOCK + HUD_HEIGHT + 10;
   init();
 
   keyHandler = (e: KeyboardEvent) => {
