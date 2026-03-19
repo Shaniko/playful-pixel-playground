@@ -7,7 +7,7 @@ let stopped = false;
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   const W = 420;
-  const H = 500;
+  const H = 560; // taller to fit number picker
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
@@ -22,6 +22,13 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   const HINT_BTN = { x: W / 2 - 50, y: PAD + GRID + 45, w: 100, h: 34 };
   let hintsUsed = 0;
 
+  // Number picker (bottom of canvas, always visible when cell selected)
+  const PICKER_Y = PAD + GRID + 90;
+  const PICKER_BTN = 38;
+  const PICKER_GAP = 4;
+  const PICKER_TOTAL_W = 5 * PICKER_BTN + 4 * PICKER_GAP;
+  const PICKER_OX = (W - PICKER_TOTAL_W) / 2;
+
   let solution: number[][] = [];
   let puzzle: number[][] = [];
   let player: number[][] = [];
@@ -30,6 +37,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   let selC = -1;
   let won = false;
   let hintFlash = -1;
+  let showPicker = false;
 
   function generateSolution(): number[][] {
     const board = Array.from({ length: 9 }, () => Array(9).fill(0));
@@ -92,6 +100,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     won = false;
     hintsUsed = 0;
     hintFlash = -1;
+    showPicker = false;
   }
 
   function useHint() {
@@ -109,6 +118,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     selC = c;
     hintsUsed++;
     hintFlash = Date.now();
+    showPicker = false;
     sfxHint();
     if (checkWin()) { won = true; sfxWin(); }
   }
@@ -132,6 +142,66 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       for (let j = bc; j < bc + 3; j++)
         if ((i !== r || j !== c) && player[i][j] === v) return true;
     return false;
+  }
+
+  function getPickerBtn(n: number): { x: number; y: number; w: number; h: number } {
+    // Layout: two rows - top row 1-5, bottom row 6-9 + X(delete=0)
+    const idx = n === 0 ? 9 : n - 1; // 0 means delete, put at position 9
+    const row = Math.floor(idx / 5);
+    const col = idx % 5;
+    return {
+      x: PICKER_OX + col * (PICKER_BTN + PICKER_GAP),
+      y: PICKER_Y + row * (PICKER_BTN + PICKER_GAP),
+      w: PICKER_BTN,
+      h: PICKER_BTN,
+    };
+  }
+
+  function drawPicker() {
+    const t = getTheme();
+    // Draw all 10 buttons: 1-9 and X (delete)
+    for (let n = 1; n <= 9; n++) {
+      const btn = getPickerBtn(n);
+      ctx.fillStyle = t.primarySoft;
+      ctx.strokeStyle = t.primary;
+      ctx.lineWidth = 1.5;
+      const r = 6;
+      ctx.beginPath();
+      ctx.moveTo(btn.x + r, btn.y);
+      ctx.arcTo(btn.x + btn.w, btn.y, btn.x + btn.w, btn.y + btn.h, r);
+      ctx.arcTo(btn.x + btn.w, btn.y + btn.h, btn.x, btn.y + btn.h, r);
+      ctx.arcTo(btn.x, btn.y + btn.h, btn.x, btn.y, r);
+      ctx.arcTo(btn.x, btn.y, btn.x + btn.w, btn.y, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = t.primary;
+      ctx.font = '600 16px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(n), btn.x + btn.w / 2, btn.y + btn.h / 2);
+    }
+    // Delete button
+    const del = getPickerBtn(0);
+    ctx.fillStyle = 'rgba(239,68,68,0.1)';
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 1.5;
+    const r = 6;
+    ctx.beginPath();
+    ctx.moveTo(del.x + r, del.y);
+    ctx.arcTo(del.x + del.w, del.y, del.x + del.w, del.y + del.h, r);
+    ctx.arcTo(del.x + del.w, del.y + del.h, del.x, del.y + del.h, r);
+    ctx.arcTo(del.x, del.y + del.h, del.x, del.y, r);
+    ctx.arcTo(del.x, del.y, del.x + del.w, del.y, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.font = '600 16px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✕', del.x + del.w / 2, del.y + del.h / 2);
   }
 
   function draw() {
@@ -223,11 +293,11 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`💡 HINT (${hintsUsed})`, W / 2, HINT_BTN.y + HINT_BTN.h / 2);
+    }
 
-      // Instructions text
-      ctx.fillStyle = t.textFaint;
-      ctx.font = '11px "JetBrains Mono", monospace';
-      ctx.fillText('Click cell + 1-9 · DELETE clear · H hint', W / 2, HINT_BTN.y + HINT_BTN.h + 20);
+    // Number picker (always show when a non-fixed cell is selected)
+    if (showPicker && selR >= 0 && selC >= 0 && !fixed[selR][selC] && !won) {
+      drawPicker();
     }
 
     // Win overlay
@@ -237,6 +307,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       ctx.fillStyle = t.primary;
       ctx.font = 'bold 36px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillText('YOU WIN!', W / 2, H / 2 - 20);
       ctx.fillStyle = t.textMuted;
       ctx.font = '14px "JetBrains Mono", monospace';
@@ -247,36 +318,67 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (!stopped) animId = requestAnimationFrame(draw);
   }
 
-  function onClick(e: MouseEvent) {
+  function getCanvasXY(clientX: number, clientY: number) {
     const rect = canvas.getBoundingClientRect();
     const sx = canvas.width / rect.width;
     const sy = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * sx;
-    const my = (e.clientY - rect.top) * sy;
+    return { mx: (clientX - rect.left) * sx, my: (clientY - rect.top) * sy };
+  }
 
+  function handleTap(mx: number, my: number) {
+    // Check picker buttons first
+    if (showPicker && selR >= 0 && selC >= 0 && !fixed[selR][selC] && !won) {
+      for (let n = 0; n <= 9; n++) {
+        const btn = getPickerBtn(n);
+        if (mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h) {
+          if (n === 0) {
+            player[selR][selC] = 0;
+          } else {
+            player[selR][selC] = n;
+            sfxClick();
+            if (checkWin()) { won = true; showPicker = false; sfxWin(); }
+          }
+          return;
+        }
+      }
+    }
+
+    // Check hint button
     if (!won && mx >= HINT_BTN.x && mx <= HINT_BTN.x + HINT_BTN.w && my >= HINT_BTN.y && my <= HINT_BTN.y + HINT_BTN.h) {
       useHint();
       return;
     }
 
     if (won) return;
+
+    // Check grid cells
     const c = Math.floor((mx - PAD) / CELL);
     const r = Math.floor((my - PAD) / CELL);
     if (r >= 0 && r < 9 && c >= 0 && c < 9) {
       selR = r;
       selC = c;
+      showPicker = !fixed[r][c]; // show picker only for non-fixed cells
     } else {
       selR = -1;
       selC = -1;
+      showPicker = false;
     }
   }
 
+  function onClick(e: MouseEvent) {
+    const { mx, my } = getCanvasXY(e.clientX, e.clientY);
+    handleTap(mx, my);
+  }
+
+  function onTouchStart(e: TouchEvent) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const { mx, my } = getCanvasXY(touch.clientX, touch.clientY);
+    handleTap(mx, my);
+  }
+
   function onMouseMove(e: MouseEvent) {
-    const rect = canvas.getBoundingClientRect();
-    const sx = canvas.width / rect.width;
-    const sy = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * sx;
-    const my = (e.clientY - rect.top) * sy;
+    const { mx, my } = getCanvasXY(e.clientX, e.clientY);
     const over = !won && mx >= HINT_BTN.x && mx <= HINT_BTN.x + HINT_BTN.w && my >= HINT_BTN.y && my <= HINT_BTN.y + HINT_BTN.h;
     (canvas as any).__hintHover = over;
     canvas.style.cursor = over ? 'pointer' : 'default';
@@ -292,21 +394,20 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
       return;
     }
 
-    // Arrow navigation — works even on fixed cells and when no cell is selected
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
-      if (selR < 0 || selC < 0) { selR = 0; selC = 0; return; }
+      if (selR < 0 || selC < 0) { selR = 0; selC = 0; showPicker = !fixed[0][0]; return; }
       if (e.key === 'ArrowUp' && selR > 0) selR--;
       else if (e.key === 'ArrowDown' && selR < 8) selR++;
       else if (e.key === 'ArrowLeft' && selC > 0) selC--;
       else if (e.key === 'ArrowRight' && selC < 8) selC++;
+      showPicker = !fixed[selR][selC];
       return;
     }
 
-    // Tab / Shift+Tab — cycle through cells
     if (e.key === 'Tab') {
       e.preventDefault();
-      if (selR < 0 || selC < 0) { selR = 0; selC = 0; return; }
+      if (selR < 0 || selC < 0) { selR = 0; selC = 0; showPicker = !fixed[0][0]; return; }
       if (e.shiftKey) {
         selC--;
         if (selC < 0) { selC = 8; selR--; }
@@ -316,6 +417,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
         if (selC > 8) { selC = 0; selR++; }
         if (selR > 8) { selR = 0; selC = 0; }
       }
+      showPicker = !fixed[selR][selC];
       return;
     }
 
@@ -325,13 +427,14 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (e.key >= '1' && e.key <= '9') {
       player[selR][selC] = parseInt(e.key);
       sfxClick();
-      if (checkWin()) { won = true; sfxWin(); }
+      if (checkWin()) { won = true; showPicker = false; sfxWin(); }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
       player[selR][selC] = 0;
     }
   }
 
   canvas.addEventListener('click', onClick);
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
   canvas.addEventListener('mousemove', onMouseMove);
   window.addEventListener('keydown', onKey);
 
@@ -339,6 +442,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   draw();
 
   (canvas as any).__sudoku_onClick = onClick;
+  (canvas as any).__sudoku_onTouchStart = onTouchStart;
   (canvas as any).__sudoku_onMouseMove = onMouseMove;
   (canvas as any).__sudoku_onKey = onKey;
 }
@@ -349,9 +453,11 @@ export function stop() {
   const canvases = document.querySelectorAll('canvas');
   canvases.forEach((c) => {
     const onClick = (c as any).__sudoku_onClick;
+    const onTouchStart = (c as any).__sudoku_onTouchStart;
     const onMouseMove = (c as any).__sudoku_onMouseMove;
     const onKey = (c as any).__sudoku_onKey;
     if (onClick) c.removeEventListener('click', onClick);
+    if (onTouchStart) c.removeEventListener('touchstart', onTouchStart);
     if (onMouseMove) c.removeEventListener('mousemove', onMouseMove);
     if (onKey) window.removeEventListener('keydown', onKey);
   });

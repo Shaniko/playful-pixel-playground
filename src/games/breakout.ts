@@ -5,6 +5,9 @@ let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
 let keyUpHandler: (e: KeyboardEvent) => void;
+let canvasRef: HTMLCanvasElement;
+let touchMoveHandler: (e: TouchEvent) => void;
+let touchStartHandler: (e: TouchEvent) => void;
 
 const W = 500, H = 400;
 const PADDLE_W = 80, PADDLE_H = 12;
@@ -167,6 +170,7 @@ function loop() {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
+  canvasRef = canvas;
   canvas.width = W;
   canvas.height = H;
   ballBaseSpeed = difficulty === 'easy' ? 3 : difficulty === 'hard' ? 6 : 4;
@@ -178,8 +182,31 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };
+
+  touchStartHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (gameOver && Date.now() - gameOverTime > 1000) { init(); return; }
+    if (!launched) { launched = true; return; }
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const touchX = (touch.clientX - rect.left) * sx;
+    paddleX = Math.max(0, Math.min(W - PADDLE_W, touchX - PADDLE_W / 2));
+  };
+
+  touchMoveHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const touchX = (touch.clientX - rect.left) * sx;
+    paddleX = Math.max(0, Math.min(W - PADDLE_W, touchX - PADDLE_W / 2));
+  };
+
   window.addEventListener('keydown', keyHandler);
   window.addEventListener('keyup', keyUpHandler);
+  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+  canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
@@ -187,4 +214,6 @@ export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
   window.removeEventListener('keyup', keyUpHandler);
+  canvasRef?.removeEventListener('touchstart', touchStartHandler);
+  canvasRef?.removeEventListener('touchmove', touchMoveHandler);
 }

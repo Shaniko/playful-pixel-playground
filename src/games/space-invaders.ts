@@ -5,6 +5,11 @@ let ctx: CanvasRenderingContext2D;
 let animId: number;
 let keyHandler: (e: KeyboardEvent) => void;
 let keyUpHandler: (e: KeyboardEvent) => void;
+let canvasRef: HTMLCanvasElement;
+let touchMoveHandler: (e: TouchEvent) => void;
+let touchStartHandler: (e: TouchEvent) => void;
+let touchEndHandler: (e: TouchEvent) => void;
+let isTouchShooting = false;
 
 const W = 500, H = 450;
 const PLAYER_W = 40, PLAYER_H = 20;
@@ -46,6 +51,7 @@ function init() {
   lastEnemyMove = 0;
   lastEnemyShot = 0;
   lastShot = 0;
+  isTouchShooting = false;
 
   enemies = [];
   const offX = (W - ENEMY_COLS * (ENEMY_W + 12)) / 2;
@@ -67,7 +73,7 @@ function update(time: number) {
   if (keys['ArrowLeft']) playerX = Math.max(0, playerX - 5);
   if (keys['ArrowRight']) playerX = Math.min(W - PLAYER_W, playerX + 5);
 
-  if (keys[' '] && time - lastShot > 250) {
+  if ((keys[' '] || isTouchShooting) && time - lastShot > 250) {
     bullets.push({ x: playerX + PLAYER_W / 2 - BULLET_W / 2, y: H - 50 });
     lastShot = time;
     sfxShoot();
@@ -189,6 +195,7 @@ function loop(time: number) {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
+  canvasRef = canvas;
   canvas.width = W;
   canvas.height = H;
   baseEnemySpeed = difficulty === 'easy' ? 1100 : difficulty === 'hard' ? 500 : 800;
@@ -200,8 +207,37 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   };
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };
+
+  touchStartHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (gameOver && Date.now() - gameOverTime > 1000) { init(); return; }
+    isTouchShooting = true;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const touchX = (touch.clientX - rect.left) * sx;
+    playerX = Math.max(0, Math.min(W - PLAYER_W, touchX - PLAYER_W / 2));
+  };
+
+  touchMoveHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const touchX = (touch.clientX - rect.left) * sx;
+    playerX = Math.max(0, Math.min(W - PLAYER_W, touchX - PLAYER_W / 2));
+  };
+
+  touchEndHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    isTouchShooting = false;
+  };
+
   window.addEventListener('keydown', keyHandler);
   window.addEventListener('keyup', keyUpHandler);
+  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+  canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
+  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
@@ -209,4 +245,7 @@ export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
   window.removeEventListener('keyup', keyUpHandler);
+  canvasRef?.removeEventListener('touchstart', touchStartHandler);
+  canvasRef?.removeEventListener('touchmove', touchMoveHandler);
+  canvasRef?.removeEventListener('touchend', touchEndHandler);
 }
