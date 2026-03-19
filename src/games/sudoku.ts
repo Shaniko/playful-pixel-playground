@@ -371,6 +371,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   }
 
   function onTouchStart(e: TouchEvent) {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     const touch = e.touches[0];
     const { mx, my } = getCanvasXY(touch.clientX, touch.clientY);

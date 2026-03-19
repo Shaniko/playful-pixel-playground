@@ -407,6 +407,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   clickHandler = () => jump();
 
   touchStartHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     const touch = e.touches[0];
     touchStartY = touch.clientY;
@@ -414,6 +415,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   touchEndHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     const touch = e.changedTouches[0];
     const dy = touch.clientY - touchStartY;
