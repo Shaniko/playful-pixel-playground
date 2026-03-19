@@ -44,7 +44,7 @@ function draw() {
   const t = getTheme();
   const W = ctx.canvas.width, H = ctx.canvas.height;
   const offX = (W - GRID * CELL) / 2;
-  const offY = (H - GRID * CELL) / 2;
+  const offY = 40;
 
   ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
@@ -68,7 +68,7 @@ function draw() {
   ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(`SCORE: ${score}`, W / 2, offY - 15);
+  ctx.fillText(`SCORE: ${score}`, W / 2, 24);
 
   if (gameOver) {
     ctx.fillStyle = t.overlay;
@@ -120,7 +120,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   ctx = canvas.getContext('2d')!;
   canvasRef = canvas;
   canvas.width = 440;
-  canvas.height = 440;
+  canvas.height = GRID * CELL + 50;
   baseDifficulty = difficulty;
   init();
 
