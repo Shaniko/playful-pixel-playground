@@ -433,8 +433,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     }
   }
 
-  canvas.addEventListener('click', onClick);
-  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+  document.addEventListener('click', onClick);
+  document.addEventListener('touchstart', onTouchStart, { passive: false });
   canvas.addEventListener('mousemove', onMouseMove);
   window.addEventListener('keydown', onKey);
 
@@ -456,8 +456,8 @@ export function stop() {
     const onTouchStart = (c as any).__sudoku_onTouchStart;
     const onMouseMove = (c as any).__sudoku_onMouseMove;
     const onKey = (c as any).__sudoku_onKey;
-    if (onClick) c.removeEventListener('click', onClick);
-    if (onTouchStart) c.removeEventListener('touchstart', onTouchStart);
+    if (onClick) document.removeEventListener('click', onClick);
+    if (onTouchStart) document.removeEventListener('touchstart', onTouchStart);
     if (onMouseMove) c.removeEventListener('mousemove', onMouseMove);
     if (onKey) window.removeEventListener('keydown', onKey);
   });

@@ -166,14 +166,14 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   window.addEventListener('keydown', keyHandler);
-  canvas.addEventListener('touchstart', touchHandler, { passive: false });
-  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
+  document.addEventListener('touchstart', touchHandler, { passive: false });
+  document.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
 export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
-  canvasRef?.removeEventListener('touchstart', touchHandler);
-  canvasRef?.removeEventListener('touchend', touchEndHandler);
+  document.removeEventListener('touchstart', touchHandler);
+  document.removeEventListener('touchend', touchEndHandler);
 }

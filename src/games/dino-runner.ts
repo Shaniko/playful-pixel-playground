@@ -425,9 +425,9 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
   window.addEventListener('keydown', keyHandler);
   window.addEventListener('keyup', keyUpHandler);
-  canvas.addEventListener('click', clickHandler);
-  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
-  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
+  document.addEventListener('click', clickHandler);
+  document.addEventListener('touchstart', touchStartHandler, { passive: false });
+  document.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
@@ -435,7 +435,7 @@ export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
   window.removeEventListener('keyup', keyUpHandler);
-  canvasRef?.removeEventListener('click', clickHandler);
-  canvasRef?.removeEventListener('touchstart', touchStartHandler);
-  canvasRef?.removeEventListener('touchend', touchEndHandler);
+  document.removeEventListener('click', clickHandler);
+  document.removeEventListener('touchstart', touchStartHandler);
+  document.removeEventListener('touchend', touchEndHandler);
 }
