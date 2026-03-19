@@ -184,6 +184,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };
 
   touchStartHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     if (gameOver && Date.now() - gameOverTime > 1000) { init(); return; }
     if (!launched) { launched = true; return; }
