@@ -263,9 +263,9 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   window.addEventListener('keydown', keyHandler);
-  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
-  canvas.addEventListener('touchmove', touchMoveHandler, { passive: false });
-  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
+  document.addEventListener('touchstart', touchStartHandler, { passive: false });
+  document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+  document.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
