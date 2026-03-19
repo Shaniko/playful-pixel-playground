@@ -351,7 +351,7 @@ function draw() {
     else drawBird(o);
   }
 
-  drawLuigi(80, luigiY, gameOver);
+  drawCat(80, catY, gameOver);
 
   ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
