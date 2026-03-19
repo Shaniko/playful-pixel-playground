@@ -1,19 +1,29 @@
 
 
 ## Problem
-Touch gestures outside the canvas don't work in games (confirmed with Snake, likely affects others). The touch event listeners are already on `document` level, but the overlay container lacks `touch-action: none`, so the browser may be consuming swipe/drag gestures as scroll/navigation before JavaScript handlers fire.
-
-## Root Cause
-The `touch-action: none` CSS is only on the `<canvas>` element. The surrounding overlay `<div>` elements don't have it, so when a user swipes on the area outside the canvas, the browser interprets it as a scroll/back-navigation gesture and may not fire `touchend`/`touchmove` properly.
+The BACK button can't be tapped on mobile because all 7 games register `touchstart`/`touchend` handlers on `document` with `e.preventDefault()`, which swallows the tap before it reaches the button's `click` handler.
 
 ## Fix
 
-### 1. Add `touch-action: none` to the game overlay container (`src/components/GameOverlay.tsx`)
-- Add `touch-action: none` style to the outermost game `<div>` (the `fixed inset-0` container) so all touches anywhere in the overlay are handled by JavaScript, not the browser.
+### 1. Guard all document-level touch handlers in every game (`src/games/*.ts`)
+In each game's `touchStartHandler`, `touchMoveHandler`, and `touchEndHandler`, add an early return that skips `preventDefault()` when the touch target is inside a `<button>` element:
 
-### 2. QA regression per `QA-CHECKLIST.md`
-- Verify all 7 games respond to touch from anywhere on the screen.
-- Verify BACK button still works on touch.
-- Verify HUD/scores are visible.
-- Version bump to v3.
+```ts
+if ((e.target as HTMLElement)?.closest?.('button')) return;
+```
+
+This one-line guard at the top of each touch handler lets button taps pass through normally while still capturing game gestures everywhere else.
+
+**Files to edit** (7 files):
+- `src/games/snake.ts` — `touchHandler`, `touchEndHandler`
+- `src/games/tetris.ts` — `touchStartHandler`, `touchMoveHandler`, `touchEndHandler`
+- `src/games/pong.ts` — `touchStartHandler`, `touchMoveHandler`
+- `src/games/breakout.ts` — `touchStartHandler`, `touchMoveHandler`
+- `src/games/space-invaders.ts` — `touchStartHandler`, `touchMoveHandler`, `touchEndHandler`
+- `src/games/dino-runner.ts` — `touchStartHandler`, `touchEndHandler`
+- `src/games/sudoku.ts` — `onTouchStart`
+
+### 2. Version bump + QA
+- Update version to **v4** in `src/pages/Index.tsx`
+- QA regression: verify BACK button works on mobile, all games still respond to touch gestures, no scroll interference
 
