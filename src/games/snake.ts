@@ -120,7 +120,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   ctx = canvas.getContext('2d')!;
   canvasRef = canvas;
   canvas.width = 440;
-  canvas.height = 440;
+  canvas.height = GRID * CELL + 50;
   baseDifficulty = difficulty;
   init();
 
