@@ -9,7 +9,7 @@ const games = [
   { id: "pong", name: "Pong", genre: "Sports", emoji: "🏓", desc: "Classic vs AI" },
   { id: "breakout", name: "Breakout", genre: "Action", emoji: "💥", desc: "Smash all bricks" },
   { id: "space-invaders", name: "Space Invaders", genre: "Shooter", emoji: "👾", desc: "Defend Earth" },
-  { id: "dino-runner", name: "Dino Run", genre: "Runner", emoji: "🐱", desc: "Jump, run, survive!" },
+  { id: "dino-runner", name: "Dino Run", genre: "Runner", emoji: "🟢", desc: "Jump, run, survive!" },
   { id: "sudoku", name: "Sudoku", genre: "Puzzle", emoji: "🔢", desc: "Fill the 9×9 grid" },
 ];
 

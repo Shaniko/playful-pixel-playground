@@ -16,7 +16,7 @@ let touchStartHandler: (e: TouchEvent) => void;
 let touchEndHandler: (e: TouchEvent) => void;
 let touchStartY: number;
 
-let catY: number, catVY: number, isJumping: boolean, isDucking: boolean;
+let luigiY: number, luigiVY: number, isJumping: boolean, isDucking: boolean;
 let obstacles: { x: number; w: number; h: number; type: 'cactus' | 'bird'; birdY: number }[];
 let clouds: { x: number; y: number; w: number }[];
 let groundOffset: number;
@@ -28,13 +28,13 @@ let gameOverTime: number;
 let started: boolean;
 let frame: number;
 let legPhase: number;
-let tailPhase: number;
+let armPhase: number;
 let blinkTimer: number;
 let isBlinking: boolean;
 
 function init() {
-  catY = GROUND_Y;
-  catVY = 0;
+  luigiY = GROUND_Y;
+  luigiVY = 0;
   isJumping = false;
   isDucking = false;
   obstacles = [];
@@ -46,7 +46,7 @@ function init() {
   started = false;
   frame = 0;
   legPhase = 0;
-  tailPhase = 0;
+  armPhase = 0;
   blinkTimer = 0;
   isBlinking = false;
   highScore = parseInt(localStorage.getItem('dino-runner-hi') || '0', 10);
@@ -65,7 +65,7 @@ function jump() {
   if (gameOver) { if (canRestart()) { init(); started = true; } return; }
   if (!started) { started = true; return; }
   if (!isJumping) {
-    catVY = JUMP_FORCE;
+    luigiVY = JUMP_FORCE;
     isJumping = true;
     isDucking = false;
     sfxJump();
@@ -86,14 +86,14 @@ function update() {
   if (!started || gameOver) return;
   frame++;
   legPhase += 0.3;
-  tailPhase += 0.05;
+  armPhase += 0.25;
   blinkTimer++;
   if (blinkTimer > 120) { isBlinking = true; }
   if (blinkTimer > 126) { isBlinking = false; blinkTimer = 0; }
 
-  catVY += GRAVITY;
-  catY += catVY;
-  if (catY >= GROUND_Y) { catY = GROUND_Y; catVY = 0; isJumping = false; }
+  luigiVY += GRAVITY;
+  luigiY += luigiVY;
+  if (luigiY >= GROUND_Y) { luigiY = GROUND_Y; luigiVY = 0; isJumping = false; }
 
   groundOffset = (groundOffset + speed) % 20;
 
@@ -106,9 +106,9 @@ function update() {
   score++;
   if (score % 500 === 0) speed += 0.5;
 
-  const catX = 80;
-  const catR = isDucking ? 10 : 18;
-  const catCenterY = isDucking ? catY - 10 : catY - 18;
+  const lx = 80;
+  const lr = isDucking ? 10 : 18;
+  const lCenterY = isDucking ? luigiY - 10 : luigiY - 18;
   for (const o of obstacles) {
     let ox: number, oy: number, ow: number, oh: number;
     if (o.type === 'cactus') {
@@ -116,10 +116,10 @@ function update() {
     } else {
       ox = o.x; oy = o.birdY; ow = o.w; oh = o.h;
     }
-    const closestX = Math.max(ox, Math.min(catX, ox + ow));
-    const closestY = Math.max(oy, Math.min(catCenterY, oy + oh));
-    const dx = catX - closestX, dy = catCenterY - closestY;
-    if (dx * dx + dy * dy < (catR - 2) * (catR - 2)) {
+    const closestX = Math.max(ox, Math.min(lx, ox + ow));
+    const closestY = Math.max(oy, Math.min(lCenterY, oy + oh));
+    const dx = lx - closestX, dy = lCenterY - closestY;
+    if (dx * dx + dy * dy < (lr - 2) * (lr - 2)) {
       gameOver = true;
       gameOverTime = Date.now();
       sfxDie();
@@ -128,144 +128,180 @@ function update() {
   }
 }
 
-function drawCat(x: number, y: number, dead: boolean) {
+function drawLuigi(x: number, y: number, dead: boolean) {
   if (isDucking && !dead) {
-    const rw = 24, rh = 10;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    const tw = Math.sin(tailPhase * 3) * 6;
-    ctx.moveTo(x - rw + 2, y - rh);
-    ctx.quadraticCurveTo(x - rw - 10, y - rh - 10 + tw, x - rw - 6, y - rh - 18);
-    ctx.stroke();
+    // Ducking Luigi — flat/crouching pose
+    const rw = 22, rh = 10;
 
-    ctx.fillStyle = '#f59e0b';
+    // Body (blue overalls, flat)
+    ctx.fillStyle = '#1e40af';
     ctx.beginPath();
     ctx.ellipse(x, y - rh, rw, rh, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#fde68a';
+    // Green shirt visible at edges
+    ctx.fillStyle = '#16a34a';
+    ctx.fillRect(x - rw + 4, y - rh - 3, 8, 6);
+    ctx.fillRect(x + rw - 12, y - rh - 3, 8, 6);
+
+    // Head (skin tone, small when ducking)
+    ctx.fillStyle = '#fbbf24';
     ctx.beginPath();
-    ctx.ellipse(x + 2, y - rh + 3, rw * 0.5, rh * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 10, y - rh - 2, 8, 7, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#f59e0b';
+    // Cap (green, flat)
+    ctx.fillStyle = '#16a34a';
     ctx.beginPath();
-    ctx.moveTo(x + 12, y - rh * 2 + 2);
-    ctx.lineTo(x + 16, y - rh * 2 - 5);
-    ctx.lineTo(x + 8, y - rh * 2 + 1);
+    ctx.ellipse(x + 10, y - rh - 7, 10, 4, 0, 0, Math.PI * 2);
     ctx.fill();
+    // Cap brim
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(x + 10, y - rh - 5, 12, 3);
 
+    // Eyes (small)
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(x + 8, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 18, y - rh - 1, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#222';
-    ctx.beginPath(); ctx.ellipse(x + 9, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 19, y - rh - 1, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 12, y - rh - 1, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1e40af';
+    ctx.beginPath(); ctx.arc(x + 13, y - rh - 1, 1, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath(); ctx.ellipse(x + 14, y - rh + 4, 2, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+    // Mustache
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(x + 8, y - rh + 2, 8, 2);
     return;
   }
 
   const r = 18;
-  ctx.strokeStyle = '#f59e0b';
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  const tw = Math.sin(tailPhase * 3) * 8;
-  ctx.moveTo(x - r + 2, y - r);
-  ctx.quadraticCurveTo(x - r - 12, y - r - 15 + tw, x - r - 8, y - r - 25);
-  ctx.stroke();
 
-  ctx.fillStyle = '#f59e0b';
+  // === LEGS (behind body) ===
+  if (!dead) {
+    const legOff1 = Math.sin(legPhase) * (isJumping ? 0 : 5);
+    const legOff2 = Math.sin(legPhase + Math.PI) * (isJumping ? 0 : 5);
+    // Blue overalls legs
+    ctx.fillStyle = '#1e40af';
+    ctx.fillRect(x - 5, y - 4 + legOff1, 6, 12 - legOff1);
+    ctx.fillRect(x + 4, y - 4 + legOff2, 6, 12 - legOff2);
+    // Brown shoes
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath(); ctx.arc(x - 2, y + 8, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 7, y + 8, 4, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // === BODY — Blue overalls ===
+  ctx.fillStyle = '#1e40af';
   ctx.beginPath();
-  ctx.ellipse(x, y - r, r, r + 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, y - r + 4, 12, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#fde68a';
+  // Overall straps
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(x - 6, y - r - 4, 3, 10);
+  ctx.fillRect(x + 3, y - r - 4, 3, 10);
+
+  // Overall buttons (yellow)
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(x - 5, y - r + 1, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 5, y - r + 1, 1.5, 0, Math.PI * 2); ctx.fill();
+
+  // === GREEN SHIRT (visible at sleeves) ===
+  ctx.fillStyle = '#16a34a';
   ctx.beginPath();
-  ctx.ellipse(x + 2, y - r + 5, r * 0.55, r * 0.65, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, y - r - 2, 13, 8, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#f59e0b';
-  ctx.beginPath();
-  ctx.moveTo(x - 10, y - r * 2 + 4);
-  ctx.lineTo(x - 16, y - r * 2 - 10);
-  ctx.lineTo(x - 3, y - r * 2 + 1);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(x + 10, y - r * 2 + 4);
-  ctx.lineTo(x + 16, y - r * 2 - 10);
-  ctx.lineTo(x + 3, y - r * 2 + 1);
-  ctx.fill();
+  // === ARMS ===
+  if (!dead) {
+    const armSwing1 = Math.sin(armPhase) * (isJumping ? 3 : 6);
+    const armSwing2 = Math.sin(armPhase + Math.PI) * (isJumping ? 3 : 6);
+    ctx.fillStyle = '#16a34a';
+    // Left arm
+    ctx.save();
+    ctx.translate(x - 12, y - r - 2);
+    ctx.rotate(armSwing1 * 0.05);
+    ctx.fillRect(-3, 0, 5, 12);
+    ctx.restore();
+    // Right arm
+    ctx.save();
+    ctx.translate(x + 12, y - r - 2);
+    ctx.rotate(armSwing2 * 0.05);
+    ctx.fillRect(-2, 0, 5, 12);
+    ctx.restore();
 
+    // Gloves (white)
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(x - 13, y - r + 10 + armSwing1 * 0.3, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 13, y - r + 10 + armSwing2 * 0.3, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // === HEAD ===
+  // Face (skin)
   ctx.fillStyle = '#fbbf24';
   ctx.beginPath();
-  ctx.moveTo(x - 9, y - r * 2 + 4);
-  ctx.lineTo(x - 13, y - r * 2 - 5);
-  ctx.lineTo(x - 5, y - r * 2 + 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(x + 9, y - r * 2 + 4);
-  ctx.lineTo(x + 13, y - r * 2 - 5);
-  ctx.lineTo(x + 5, y - r * 2 + 2);
+  ctx.ellipse(x + 1, y - r - 12, 10, 10, 0, 0, Math.PI * 2);
   ctx.fill();
 
+  // === CAP (green) ===
+  ctx.fillStyle = '#16a34a';
+  ctx.beginPath();
+  ctx.ellipse(x + 1, y - r - 18, 11, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Cap brim
+  ctx.fillStyle = '#15803d';
+  ctx.beginPath();
+  ctx.moveTo(x + 4, y - r - 14);
+  ctx.lineTo(x + 18, y - r - 15);
+  ctx.lineTo(x + 16, y - r - 12);
+  ctx.lineTo(x + 4, y - r - 12);
+  ctx.fill();
+
+  // "L" emblem on cap
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x + 1, y - r - 19, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#16a34a';
+  ctx.font = 'bold 8px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('L', x + 1, y - r - 16);
+
+  // === EYES ===
   if (dead) {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
-    [-6, 8].forEach(ex => {
-      ctx.beginPath(); ctx.moveTo(x + ex - 4, y - r - 6); ctx.lineTo(x + ex + 4, y - r + 2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x + ex + 4, y - r - 6); ctx.lineTo(x + ex - 4, y - r + 2); ctx.stroke();
+    [-4, 6].forEach(ex => {
+      ctx.beginPath(); ctx.moveTo(x + ex - 3, y - r - 15); ctx.lineTo(x + ex + 3, y - r - 9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + ex + 3, y - r - 15); ctx.lineTo(x + ex - 3, y - r - 9); ctx.stroke();
     });
   } else {
-    const eyeH = isBlinking ? 1 : 5;
+    const eyeH = isBlinking ? 0.5 : 3;
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(x - 6, y - r - 2, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 8, y - r - 2, 5, 6, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#222';
-    ctx.beginPath(); ctx.ellipse(x - 5, y - r - 1, 2.5, eyeH > 1 ? 3 : 0.5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 9, y - r - 1, 2.5, eyeH > 1 ? 3 : 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x - 4, y - r - 13, 4, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 6, y - r - 13, 4, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1e40af';
+    ctx.beginPath(); ctx.ellipse(x - 3, y - r - 13, 2, eyeH, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 7, y - r - 13, 2, eyeH, 0, 0, Math.PI * 2); ctx.fill();
     if (!isBlinking) {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(x - 4, y - r - 3, 1.2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + 10, y - r - 3, 1.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x - 2, y - r - 14, 0.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + 8, y - r - 14, 0.8, 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  if (!dead) {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x, y - r + 7);
-    ctx.quadraticCurveTo(x - 5, y - r + 12, x - 8, y - r + 9);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y - r + 7);
-    ctx.quadraticCurveTo(x + 5, y - r + 12, x + 8, y - r + 9);
-    ctx.stroke();
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath(); ctx.ellipse(x, y - r + 6, 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#aaa';
-    ctx.lineWidth = 0.8;
-    [-1, 1].forEach(s => {
-      ctx.beginPath(); ctx.moveTo(x + s * 8, y - r + 6); ctx.lineTo(x + s * 22, y - r + 3); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x + s * 8, y - r + 8); ctx.lineTo(x + s * 22, y - r + 10); ctx.stroke();
-    });
-  }
+  // === NOSE ===
+  ctx.fillStyle = '#f59e0b';
+  ctx.beginPath();
+  ctx.ellipse(x + 1, y - r - 10, 3, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  if (!dead) {
-    ctx.fillStyle = '#f59e0b';
-    const legOff1 = Math.sin(legPhase) * (isJumping ? 0 : 5);
-    const legOff2 = Math.sin(legPhase + Math.PI) * (isJumping ? 0 : 5);
-    ctx.fillRect(x + 5, y - 2 + legOff1, 5, 10 - legOff1);
-    ctx.fillRect(x - 2, y - 2 + legOff2, 5, 10 - legOff2);
-    ctx.fillStyle = '#fde68a';
-    ctx.beginPath(); ctx.arc(x + 7.5, y + 8, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 0.5, y + 8, 3, 0, Math.PI * 2); ctx.fill();
-  }
+  // === MUSTACHE ===
+  ctx.fillStyle = '#78350f';
+  ctx.beginPath();
+  ctx.moveTo(x - 8, y - r - 8);
+  ctx.quadraticCurveTo(x - 4, y - r - 5, x + 1, y - r - 7);
+  ctx.quadraticCurveTo(x + 6, y - r - 5, x + 10, y - r - 8);
+  ctx.quadraticCurveTo(x + 6, y - r - 6, x + 1, y - r - 8);
+  ctx.quadraticCurveTo(x - 4, y - r - 6, x - 8, y - r - 8);
+  ctx.fill();
 }
 
 function drawCactus(o: { x: number; w: number; h: number }) {
@@ -325,7 +361,7 @@ function draw() {
     else drawBird(o);
   }
 
-  drawCat(80, catY, gameOver);
+  drawLuigi(80, luigiY, gameOver);
 
   ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
@@ -391,7 +427,6 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     e.preventDefault();
     const touch = e.changedTouches[0];
     const dy = touch.clientY - touchStartY;
-    // Swipe down to duck
     if (dy > 30) {
       isDucking = true;
       setTimeout(() => { isDucking = false; }, 500);
