@@ -12,6 +12,9 @@ let keyHandler: (e: KeyboardEvent) => void;
 let keyUpHandler: (e: KeyboardEvent) => void;
 let clickHandler: () => void;
 let canvasRef: HTMLCanvasElement;
+let touchStartHandler: (e: TouchEvent) => void;
+let touchEndHandler: (e: TouchEvent) => void;
+let touchStartY: number;
 
 let catY: number, catVY: number, isJumping: boolean, isDucking: boolean;
 let obstacles: { x: number; w: number; h: number; type: 'cactus' | 'bird'; birdY: number }[];
@@ -376,9 +379,30 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     if (e.key === 'ArrowDown') isDucking = false;
   };
   clickHandler = () => jump();
+
+  touchStartHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartY = touch.clientY;
+    jump();
+  };
+
+  touchEndHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    const dy = touch.clientY - touchStartY;
+    // Swipe down to duck
+    if (dy > 30) {
+      isDucking = true;
+      setTimeout(() => { isDucking = false; }, 500);
+    }
+  };
+
   window.addEventListener('keydown', keyHandler);
   window.addEventListener('keyup', keyUpHandler);
   canvas.addEventListener('click', clickHandler);
+  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
@@ -387,4 +411,6 @@ export function stop() {
   window.removeEventListener('keydown', keyHandler);
   window.removeEventListener('keyup', keyUpHandler);
   canvasRef?.removeEventListener('click', clickHandler);
+  canvasRef?.removeEventListener('touchstart', touchStartHandler);
+  canvasRef?.removeEventListener('touchend', touchEndHandler);
 }

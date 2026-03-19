@@ -16,6 +16,11 @@ let animId: number;
 let lastMove: number;
 let keyHandler: (e: KeyboardEvent) => void;
 let baseDifficulty: 'easy' | 'medium' | 'hard';
+let canvasRef: HTMLCanvasElement;
+let touchStartX: number;
+let touchStartY: number;
+let touchHandler: (e: TouchEvent) => void;
+let touchEndHandler: (e: TouchEvent) => void;
 
 function placeFood() {
   do {
@@ -113,6 +118,7 @@ function loop(time: number) {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
+  canvasRef = canvas;
   canvas.width = 440;
   canvas.height = 440;
   baseDifficulty = difficulty;
@@ -128,11 +134,46 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     }
     e.preventDefault();
   };
+
+  touchHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+
+    // Tap to restart on game over
+    if (gameOver && Date.now() - gameOverTime > 1000) {
+      init();
+    }
+  };
+
+  touchEndHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (gameOver) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    const minSwipe = 20;
+    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0 && dir.x !== -1) nextDir = { x: 1, y: 0 };
+      else if (dx < 0 && dir.x !== 1) nextDir = { x: -1, y: 0 };
+    } else {
+      if (dy > 0 && dir.y !== -1) nextDir = { x: 0, y: 1 };
+      else if (dy < 0 && dir.y !== 1) nextDir = { x: 0, y: -1 };
+    }
+  };
+
   window.addEventListener('keydown', keyHandler);
+  canvas.addEventListener('touchstart', touchHandler, { passive: false });
+  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
 export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
+  canvasRef?.removeEventListener('touchstart', touchHandler);
+  canvasRef?.removeEventListener('touchend', touchEndHandler);
 }

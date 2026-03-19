@@ -29,6 +29,12 @@ let ctx: CanvasRenderingContext2D;
 let lastDrop: number;
 let keyHandler: (e: KeyboardEvent) => void;
 let baseDifficulty: 'easy' | 'medium' | 'hard';
+let canvasRef: HTMLCanvasElement;
+let touchStartHandler: (e: TouchEvent) => void;
+let touchEndHandler: (e: TouchEvent) => void;
+let touchStartX: number;
+let touchStartY: number;
+let touchStartTime: number;
 
 function newPiece() {
   const i = Math.floor(Math.random() * SHAPES.length);
@@ -170,6 +176,7 @@ function init() {
 
 export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
   ctx = canvas.getContext('2d')!;
+  canvasRef = canvas;
   canvas.width = 380;
   canvas.height = 500;
   baseDifficulty = difficulty;
@@ -193,11 +200,60 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     }
     e.preventDefault();
   };
+
+  touchStartHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+
+    if (gameOver && Date.now() - gameOverTime > 1000) {
+      init();
+    }
+  };
+
+  touchEndHandler = (e: TouchEvent) => {
+    e.preventDefault();
+    if (gameOver) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    const dt = Date.now() - touchStartTime;
+    const minSwipe = 25;
+
+    // Tap (short, no movement) = rotate
+    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe && dt < 300) {
+      const r = rotate(piece.shape);
+      if (!collides(piece.x, piece.y, r)) piece.shape = r;
+      return;
+    }
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // Horizontal swipe
+      if (dx > 0 && !collides(piece.x + 1, piece.y, piece.shape)) piece.x++;
+      else if (dx < 0 && !collides(piece.x - 1, piece.y, piece.shape)) piece.x--;
+    } else {
+      if (dy > 0) {
+        // Swipe down = soft drop
+        if (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 1; }
+      } else {
+        // Swipe up = hard drop
+        while (!collides(piece.x, piece.y + 1, piece.shape)) { piece.y++; score += 2; }
+        sfxMove();
+      }
+    }
+  };
+
   window.addEventListener('keydown', keyHandler);
+  canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
 export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
+  canvasRef?.removeEventListener('touchstart', touchStartHandler);
+  canvasRef?.removeEventListener('touchend', touchEndHandler);
 }
