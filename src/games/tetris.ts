@@ -273,5 +273,6 @@ export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
   canvasRef?.removeEventListener('touchstart', touchStartHandler);
+  canvasRef?.removeEventListener('touchmove', touchMoveHandler);
   canvasRef?.removeEventListener('touchend', touchEndHandler);
 }
