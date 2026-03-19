@@ -44,7 +44,7 @@ function draw() {
   const t = getTheme();
   const W = ctx.canvas.width, H = ctx.canvas.height;
   const offX = (W - GRID * CELL) / 2;
-  const offY = (H - GRID * CELL) / 2;
+  const offY = 40;
 
   ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
