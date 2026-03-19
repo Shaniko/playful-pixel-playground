@@ -24,7 +24,7 @@ const Index = () => {
         className="fixed top-4 right-4 z-50 p-2.5 rounded-full bg-card border border-border text-foreground hover:text-primary transition-all duration-300 hover:scale-110 shadow-lg"
         aria-label="Toggle theme"
       >
-        {theme === 'arcade' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        {theme === "arcade" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
       </button>
 
       <header className="pt-16 pb-10 text-center">
@@ -34,7 +34,9 @@ const Index = () => {
         >
           THE ARCADE<span className="text-primary transition-colors duration-500">.</span>
         </h1>
-        <p className="mt-3 text-muted-foreground text-sm font-mono transition-colors duration-500">Select a game to play</p>
+        <p className="mt-3 text-muted-foreground text-sm font-mono transition-colors duration-500">
+          Select a game to play v1
+        </p>
       </header>
 
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
