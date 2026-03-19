@@ -137,6 +137,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   keyUpHandler = (e: KeyboardEvent) => { keys[e.key] = false; };
 
   touchMoveHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
