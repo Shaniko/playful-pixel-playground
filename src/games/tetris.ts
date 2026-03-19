@@ -99,7 +99,7 @@ function draw() {
   ctx.fillRect(0, 0, W, H);
 
   const offX = (W - COLS * BLOCK) / 2;
-  const offY = (H - ROWS * BLOCK) / 2;
+  const offY = HUD_HEIGHT;
 
   ctx.strokeStyle = t.gridFaint;
   ctx.lineWidth = 0.5;
