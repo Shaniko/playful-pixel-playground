@@ -16,7 +16,7 @@ let touchStartHandler: (e: TouchEvent) => void;
 let touchEndHandler: (e: TouchEvent) => void;
 let touchStartY: number;
 
-let luigiY: number, luigiVY: number, isJumping: boolean, isDucking: boolean;
+let catY: number, catVY: number, isJumping: boolean, isDucking: boolean;
 let obstacles: { x: number; w: number; h: number; type: 'cactus' | 'bird'; birdY: number }[];
 let clouds: { x: number; y: number; w: number }[];
 let groundOffset: number;
@@ -28,13 +28,13 @@ let gameOverTime: number;
 let started: boolean;
 let frame: number;
 let legPhase: number;
-let armPhase: number;
+let tailPhase: number;
 let blinkTimer: number;
 let isBlinking: boolean;
 
 function init() {
-  luigiY = GROUND_Y;
-  luigiVY = 0;
+  catY = GROUND_Y;
+  catVY = 0;
   isJumping = false;
   isDucking = false;
   obstacles = [];
@@ -46,7 +46,7 @@ function init() {
   started = false;
   frame = 0;
   legPhase = 0;
-  armPhase = 0;
+  tailPhase = 0;
   blinkTimer = 0;
   isBlinking = false;
   highScore = parseInt(localStorage.getItem('dino-runner-hi') || '0', 10);
@@ -65,7 +65,7 @@ function jump() {
   if (gameOver) { if (canRestart()) { init(); started = true; } return; }
   if (!started) { started = true; return; }
   if (!isJumping) {
-    luigiVY = JUMP_FORCE;
+    catVY = JUMP_FORCE;
     isJumping = true;
     isDucking = false;
     sfxJump();
@@ -86,14 +86,14 @@ function update() {
   if (!started || gameOver) return;
   frame++;
   legPhase += 0.3;
-  armPhase += 0.25;
+  tailPhase += 0.15;
   blinkTimer++;
   if (blinkTimer > 120) { isBlinking = true; }
   if (blinkTimer > 126) { isBlinking = false; blinkTimer = 0; }
 
-  luigiVY += GRAVITY;
-  luigiY += luigiVY;
-  if (luigiY >= GROUND_Y) { luigiY = GROUND_Y; luigiVY = 0; isJumping = false; }
+  catVY += GRAVITY;
+  catY += catVY;
+  if (catY >= GROUND_Y) { catY = GROUND_Y; catVY = 0; isJumping = false; }
 
   groundOffset = (groundOffset + speed) % 20;
 
@@ -108,7 +108,7 @@ function update() {
 
   const lx = 80;
   const lr = isDucking ? 10 : 18;
-  const lCenterY = isDucking ? luigiY - 10 : luigiY - 18;
+  const lCenterY = isDucking ? catY - 10 : catY - 18;
   for (const o of obstacles) {
     let ox: number, oy: number, ow: number, oh: number;
     if (o.type === 'cactus') {
@@ -128,141 +128,115 @@ function update() {
   }
 }
 
-function drawLuigi(x: number, y: number, dead: boolean) {
+function drawCat(x: number, y: number, dead: boolean) {
   if (isDucking && !dead) {
-    // Ducking Luigi — flat/crouching pose
+    // Ducking cat — flat crouching pose
     const rw = 22, rh = 10;
-
-    // Body (blue overalls, flat)
-    ctx.fillStyle = '#1e40af';
+    // Body (orange)
+    ctx.fillStyle = '#f97316';
     ctx.beginPath();
     ctx.ellipse(x, y - rh, rw, rh, 0, 0, Math.PI * 2);
     ctx.fill();
-
-    // Green shirt visible at edges
-    ctx.fillStyle = '#16a34a';
-    ctx.fillRect(x - rw + 4, y - rh - 3, 8, 6);
-    ctx.fillRect(x + rw - 12, y - rh - 3, 8, 6);
-
-    // Head (skin tone, small when ducking)
-    ctx.fillStyle = '#fbbf24';
+    // Stripes
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 1.5;
+    for (let i = -8; i <= 8; i += 8) {
+      ctx.beginPath(); ctx.moveTo(x + i, y - rh - 6); ctx.lineTo(x + i + 3, y - rh + 6); ctx.stroke();
+    }
+    // Head (small when ducking)
+    ctx.fillStyle = '#f97316';
     ctx.beginPath();
-    ctx.ellipse(x + 10, y - rh - 2, 8, 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 14, y - rh - 2, 8, 7, 0, 0, Math.PI * 2);
     ctx.fill();
-
-    // Cap (green, flat)
-    ctx.fillStyle = '#16a34a';
-    ctx.beginPath();
-    ctx.ellipse(x + 10, y - rh - 7, 10, 4, 0, 0, Math.PI * 2);
-    ctx.fill();
-    // Cap brim
-    ctx.fillStyle = '#15803d';
-    ctx.fillRect(x + 10, y - rh - 5, 12, 3);
-
-    // Eyes (small)
+    // Ears
+    ctx.beginPath(); ctx.moveTo(x + 9, y - rh - 7); ctx.lineTo(x + 12, y - rh - 14); ctx.lineTo(x + 16, y - rh - 7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 14, y - rh - 7); ctx.lineTo(x + 17, y - rh - 14); ctx.lineTo(x + 21, y - rh - 7); ctx.fill();
+    // Inner ears
+    ctx.fillStyle = '#fca5a5';
+    ctx.beginPath(); ctx.moveTo(x + 10, y - rh - 7); ctx.lineTo(x + 12, y - rh - 12); ctx.lineTo(x + 15, y - rh - 7); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 15, y - rh - 7); ctx.lineTo(x + 17, y - rh - 12); ctx.lineTo(x + 20, y - rh - 7); ctx.fill();
+    // Eyes
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(x + 12, y - rh - 1, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#1e40af';
+    ctx.fillStyle = '#166534';
     ctx.beginPath(); ctx.arc(x + 13, y - rh - 1, 1, 0, Math.PI * 2); ctx.fill();
-
-    // Mustache
-    ctx.fillStyle = '#78350f';
-    ctx.fillRect(x + 8, y - rh + 2, 8, 2);
+    // Nose
+    ctx.fillStyle = '#fca5a5';
+    ctx.beginPath(); ctx.arc(x + 17, y - rh, 1.5, 0, Math.PI * 2); ctx.fill();
+    // Tail (flat behind)
+    ctx.strokeStyle = '#f97316';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - rw, y - rh);
+    ctx.quadraticCurveTo(x - rw - 10, y - rh - 10, x - rw - 5, y - rh - 15);
+    ctx.stroke();
     return;
   }
 
   const r = 18;
 
-  // === LEGS (behind body) ===
+  // === TAIL (behind body) ===
+  const tailWag = Math.sin(tailPhase) * 8;
+  ctx.strokeStyle = '#f97316';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x - 10, y - r + 2);
+  ctx.quadraticCurveTo(x - 22, y - r - 10 + tailWag, x - 18, y - r - 20 + tailWag);
+  ctx.stroke();
+
+  // === LEGS ===
   if (!dead) {
     const legOff1 = Math.sin(legPhase) * (isJumping ? 0 : 5);
     const legOff2 = Math.sin(legPhase + Math.PI) * (isJumping ? 0 : 5);
-    // Blue overalls legs
-    ctx.fillStyle = '#1e40af';
-    ctx.fillRect(x - 5, y - 4 + legOff1, 6, 12 - legOff1);
-    ctx.fillRect(x + 4, y - 4 + legOff2, 6, 12 - legOff2);
-    // Brown shoes
-    ctx.fillStyle = '#78350f';
-    ctx.beginPath(); ctx.arc(x - 2, y + 8, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 7, y + 8, 4, 0, Math.PI * 2); ctx.fill();
+    // Legs (orange)
+    ctx.fillStyle = '#f97316';
+    ctx.fillRect(x - 7, y - 4 + legOff1, 6, 12 - legOff1);
+    ctx.fillRect(x + 2, y - 4 + legOff2, 6, 12 - legOff2);
+    // Paws (lighter)
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath(); ctx.arc(x - 4, y + 8, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 5, y + 8, 3.5, 0, Math.PI * 2); ctx.fill();
   }
 
-  // === BODY — Blue overalls ===
-  ctx.fillStyle = '#1e40af';
+  // === BODY (orange) ===
+  ctx.fillStyle = '#f97316';
   ctx.beginPath();
-  ctx.ellipse(x, y - r + 4, 12, 14, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, y - r + 4, 13, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Overall straps
-  ctx.fillStyle = '#1e3a8a';
-  ctx.fillRect(x - 6, y - r - 4, 3, 10);
-  ctx.fillRect(x + 3, y - r - 4, 3, 10);
-
-  // Overall buttons (yellow)
-  ctx.fillStyle = '#fbbf24';
-  ctx.beginPath(); ctx.arc(x - 5, y - r + 1, 1.5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x + 5, y - r + 1, 1.5, 0, Math.PI * 2); ctx.fill();
-
-  // === GREEN SHIRT (visible at sleeves) ===
-  ctx.fillStyle = '#16a34a';
-  ctx.beginPath();
-  ctx.ellipse(x, y - r - 2, 13, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // === ARMS ===
-  if (!dead) {
-    const armSwing1 = Math.sin(armPhase) * (isJumping ? 3 : 6);
-    const armSwing2 = Math.sin(armPhase + Math.PI) * (isJumping ? 3 : 6);
-    ctx.fillStyle = '#16a34a';
-    // Left arm
-    ctx.save();
-    ctx.translate(x - 12, y - r - 2);
-    ctx.rotate(armSwing1 * 0.05);
-    ctx.fillRect(-3, 0, 5, 12);
-    ctx.restore();
-    // Right arm
-    ctx.save();
-    ctx.translate(x + 12, y - r - 2);
-    ctx.rotate(armSwing2 * 0.05);
-    ctx.fillRect(-2, 0, 5, 12);
-    ctx.restore();
-
-    // Gloves (white)
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(x - 13, y - r + 10 + armSwing1 * 0.3, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 13, y - r + 10 + armSwing2 * 0.3, 3, 0, Math.PI * 2); ctx.fill();
+  // Tiger stripes on body
+  ctx.strokeStyle = '#ea580c';
+  ctx.lineWidth = 1.5;
+  for (let i = -6; i <= 6; i += 6) {
+    ctx.beginPath(); ctx.moveTo(x + i, y - r - 6); ctx.lineTo(x + i + 2, y - r + 10); ctx.stroke();
   }
+
+  // Belly (cream)
+  ctx.fillStyle = '#fef3c7';
+  ctx.beginPath();
+  ctx.ellipse(x, y - r + 6, 7, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   // === HEAD ===
-  // Face (skin)
-  ctx.fillStyle = '#fbbf24';
+  ctx.fillStyle = '#f97316';
   ctx.beginPath();
-  ctx.ellipse(x + 1, y - r - 12, 10, 10, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 1, y - r - 12, 11, 10, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // === CAP (green) ===
-  ctx.fillStyle = '#16a34a';
-  ctx.beginPath();
-  ctx.ellipse(x + 1, y - r - 18, 11, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Cap brim
-  ctx.fillStyle = '#15803d';
-  ctx.beginPath();
-  ctx.moveTo(x + 4, y - r - 14);
-  ctx.lineTo(x + 18, y - r - 15);
-  ctx.lineTo(x + 16, y - r - 12);
-  ctx.lineTo(x + 4, y - r - 12);
-  ctx.fill();
+  // === EARS ===
+  ctx.fillStyle = '#f97316';
+  ctx.beginPath(); ctx.moveTo(x - 8, y - r - 17); ctx.lineTo(x - 4, y - r - 28); ctx.lineTo(x + 1, y - r - 17); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 2, y - r - 17); ctx.lineTo(x + 6, y - r - 28); ctx.lineTo(x + 11, y - r - 17); ctx.fill();
+  // Inner ears (pink)
+  ctx.fillStyle = '#fca5a5';
+  ctx.beginPath(); ctx.moveTo(x - 6, y - r - 17); ctx.lineTo(x - 4, y - r - 25); ctx.lineTo(x - 1, y - r - 17); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 4, y - r - 17); ctx.lineTo(x + 6, y - r - 25); ctx.lineTo(x + 9, y - r - 17); ctx.fill();
 
-  // "L" emblem on cap
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(x + 1, y - r - 19, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#16a34a';
-  ctx.font = 'bold 8px Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('L', x + 1, y - r - 16);
+  // Forehead stripes
+  ctx.strokeStyle = '#ea580c';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x - 2, y - r - 18); ctx.lineTo(x + 1, y - r - 22); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 4, y - r - 18); ctx.lineTo(x + 1, y - r - 22); ctx.stroke();
 
   // === EYES ===
   if (dead) {
@@ -273,35 +247,51 @@ function drawLuigi(x: number, y: number, dead: boolean) {
       ctx.beginPath(); ctx.moveTo(x + ex + 3, y - r - 15); ctx.lineTo(x + ex - 3, y - r - 9); ctx.stroke();
     });
   } else {
-    const eyeH = isBlinking ? 0.5 : 3;
+    const eyeH = isBlinking ? 0.5 : 3.5;
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(x - 4, y - r - 13, 4, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + 6, y - r - 13, 4, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#1e40af';
+    ctx.beginPath(); ctx.ellipse(x - 4, y - r - 13, 4.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + 6, y - r - 13, 4.5, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Green cat eyes
+    ctx.fillStyle = '#166534';
     ctx.beginPath(); ctx.ellipse(x - 3, y - r - 13, 2, eyeH, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + 7, y - r - 13, 2, eyeH, 0, 0, Math.PI * 2); ctx.fill();
+    // Eye shine
     if (!isBlinking) {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(x - 2, y - r - 14, 0.8, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + 8, y - r - 14, 0.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x - 2, y - r - 14, 1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + 8, y - r - 14, 1, 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  // === NOSE ===
-  ctx.fillStyle = '#f59e0b';
+  // === NOSE (pink) ===
+  ctx.fillStyle = '#fca5a5';
   ctx.beginPath();
-  ctx.ellipse(x + 1, y - r - 10, 3, 2, 0, 0, Math.PI * 2);
+  ctx.moveTo(x + 1, y - r - 9);
+  ctx.lineTo(x - 1, y - r - 7);
+  ctx.lineTo(x + 3, y - r - 7);
   ctx.fill();
 
-  // === MUSTACHE ===
-  ctx.fillStyle = '#78350f';
-  ctx.beginPath();
-  ctx.moveTo(x - 8, y - r - 8);
-  ctx.quadraticCurveTo(x - 4, y - r - 5, x + 1, y - r - 7);
-  ctx.quadraticCurveTo(x + 6, y - r - 5, x + 10, y - r - 8);
-  ctx.quadraticCurveTo(x + 6, y - r - 6, x + 1, y - r - 8);
-  ctx.quadraticCurveTo(x - 4, y - r - 6, x - 8, y - r - 8);
-  ctx.fill();
+  // === WHISKERS ===
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 0.8;
+  // Left whiskers
+  ctx.beginPath(); ctx.moveTo(x - 4, y - r - 8); ctx.lineTo(x - 16, y - r - 10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - 4, y - r - 7); ctx.lineTo(x - 16, y - r - 6); ctx.stroke();
+  // Right whiskers
+  ctx.beginPath(); ctx.moveTo(x + 6, y - r - 8); ctx.lineTo(x + 18, y - r - 10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 6, y - r - 7); ctx.lineTo(x + 18, y - r - 6); ctx.stroke();
+
+  // === MOUTH ===
+  if (!dead) {
+    ctx.strokeStyle = '#9ca3af';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x + 1, y - r - 7);
+    ctx.lineTo(x - 1, y - r - 5);
+    ctx.moveTo(x + 1, y - r - 7);
+    ctx.lineTo(x + 3, y - r - 5);
+    ctx.stroke();
+  }
 }
 
 function drawCactus(o: { x: number; w: number; h: number }) {
@@ -361,7 +351,7 @@ function draw() {
     else drawBird(o);
   }
 
-  drawLuigi(80, luigiY, gameOver);
+  drawCat(80, catY, gameOver);
 
   ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
