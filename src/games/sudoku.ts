@@ -433,8 +433,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
     }
   }
 
-  canvas.addEventListener('click', onClick);
-  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+  document.addEventListener('click', onClick);
+  document.addEventListener('touchstart', onTouchStart, { passive: false });
   canvas.addEventListener('mousemove', onMouseMove);
   window.addEventListener('keydown', onKey);
 

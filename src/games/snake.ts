@@ -174,6 +174,6 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 export function stop() {
   cancelAnimationFrame(animId);
   window.removeEventListener('keydown', keyHandler);
-  canvasRef?.removeEventListener('touchstart', touchHandler);
-  canvasRef?.removeEventListener('touchend', touchEndHandler);
+  document.removeEventListener('touchstart', touchHandler);
+  document.removeEventListener('touchend', touchEndHandler);
 }
