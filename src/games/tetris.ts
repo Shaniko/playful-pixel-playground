@@ -128,12 +128,12 @@ function draw() {
     );
 
   ctx.fillStyle = t.hud;
-  ctx.font = '600 16px "JetBrains Mono", monospace';
+  ctx.font = '600 14px "JetBrains Mono", monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(`SCORE: ${score}`, offX, offY - 30);
-  ctx.fillText(`LEVEL: ${level}`, offX, offY - 10);
+  ctx.fillText(`SCORE: ${score}`, offX, 16);
+  ctx.fillText(`LEVEL: ${level}`, offX, 34);
   ctx.textAlign = 'right';
-  ctx.fillText(`LINES: ${lines}`, offX + COLS * BLOCK, offY - 10);
+  ctx.fillText(`LINES: ${lines}`, offX + COLS * BLOCK, 16);
 
   if (gameOver) {
     ctx.fillStyle = t.overlay;
