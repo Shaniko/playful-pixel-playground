@@ -35,7 +35,7 @@ const Index = () => {
           THE ARCADE<span className="text-primary transition-colors duration-500">.</span>
         </h1>
         <p className="mt-3 text-muted-foreground text-sm font-mono transition-colors duration-500">
-          Select a game to play v1
+          Select a game to play v2
         </p>
       </header>
 
