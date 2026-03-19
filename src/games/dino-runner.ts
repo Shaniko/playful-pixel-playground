@@ -86,14 +86,14 @@ function update() {
   if (!started || gameOver) return;
   frame++;
   legPhase += 0.3;
-  armPhase += 0.25;
+  tailPhase += 0.15;
   blinkTimer++;
   if (blinkTimer > 120) { isBlinking = true; }
   if (blinkTimer > 126) { isBlinking = false; blinkTimer = 0; }
 
-  luigiVY += GRAVITY;
-  luigiY += luigiVY;
-  if (luigiY >= GROUND_Y) { luigiY = GROUND_Y; luigiVY = 0; isJumping = false; }
+  catVY += GRAVITY;
+  catY += catVY;
+  if (catY >= GROUND_Y) { catY = GROUND_Y; catVY = 0; isJumping = false; }
 
   groundOffset = (groundOffset + speed) % 20;
 
@@ -108,7 +108,7 @@ function update() {
 
   const lx = 80;
   const lr = isDucking ? 10 : 18;
-  const lCenterY = isDucking ? luigiY - 10 : luigiY - 18;
+  const lCenterY = isDucking ? catY - 10 : catY - 18;
   for (const o of obstacles) {
     let ox: number, oy: number, ow: number, oh: number;
     if (o.type === 'cactus') {
