@@ -125,4 +125,13 @@
 | 13 | Touch targets too small | ✅ Fixed | — |
 | 14 | Theme support for all games | ✅ Fixed | — |
 
+| 15 | HUD/score text clipped or invisible (Snake) | ✅ Fixed | — |
+| 16 | Tetris grid not filling canvas | ✅ Fixed | — |
+
+## 12. Canvas Utilization
+
+- [ ] All games fill their canvas area properly (no large empty borders)
+- [ ] HUD text (score, level, lives) is fully visible in all games
+- [ ] Game area is maximized within canvas bounds
+
 _Add new issues below this line:_
