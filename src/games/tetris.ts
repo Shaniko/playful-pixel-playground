@@ -32,10 +32,12 @@ let keyHandler: (e: KeyboardEvent) => void;
 let baseDifficulty: 'easy' | 'medium' | 'hard';
 let canvasRef: HTMLCanvasElement;
 let touchStartHandler: (e: TouchEvent) => void;
+let touchMoveHandler: (e: TouchEvent) => void;
 let touchEndHandler: (e: TouchEvent) => void;
 let touchStartX: number;
 let touchStartY: number;
 let touchStartTime: number;
+let lastTouchDropY: number;
 
 function newPiece() {
   const i = Math.floor(Math.random() * SHAPES.length);
