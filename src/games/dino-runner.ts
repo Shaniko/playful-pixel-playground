@@ -33,8 +33,8 @@ let blinkTimer: number;
 let isBlinking: boolean;
 
 function init() {
-  luigiY = GROUND_Y;
-  luigiVY = 0;
+  catY = GROUND_Y;
+  catVY = 0;
   isJumping = false;
   isDucking = false;
   obstacles = [];
@@ -46,7 +46,7 @@ function init() {
   started = false;
   frame = 0;
   legPhase = 0;
-  armPhase = 0;
+  tailPhase = 0;
   blinkTimer = 0;
   isBlinking = false;
   highScore = parseInt(localStorage.getItem('dino-runner-hi') || '0', 10);
