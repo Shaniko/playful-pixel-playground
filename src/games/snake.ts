@@ -166,8 +166,8 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   window.addEventListener('keydown', keyHandler);
-  canvas.addEventListener('touchstart', touchHandler, { passive: false });
-  canvas.addEventListener('touchend', touchEndHandler, { passive: false });
+  document.addEventListener('touchstart', touchHandler, { passive: false });
+  document.addEventListener('touchend', touchEndHandler, { passive: false });
   animId = requestAnimationFrame(loop);
 }
 
