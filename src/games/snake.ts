@@ -68,7 +68,7 @@ function draw() {
   ctx.fillStyle = t.hud;
   ctx.font = '600 16px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(`SCORE: ${score}`, W / 2, offY - 15);
+  ctx.fillText(`SCORE: ${score}`, W / 2, 24);
 
   if (gameOver) {
     ctx.fillStyle = t.overlay;
