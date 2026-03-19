@@ -222,6 +222,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
 
   // Continuous soft drop while dragging down
   touchMoveHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     if (gameOver) return;
     const touch = e.touches[0];
