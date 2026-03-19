@@ -136,6 +136,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   };
 
   touchHandler = (e: TouchEvent) => {
+    if ((e.target as HTMLElement)?.closest?.('button')) return;
     e.preventDefault();
     const touch = e.touches[0];
     touchStartX = touch.clientX;
