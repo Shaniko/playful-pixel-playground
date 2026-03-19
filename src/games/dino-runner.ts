@@ -65,7 +65,7 @@ function jump() {
   if (gameOver) { if (canRestart()) { init(); started = true; } return; }
   if (!started) { started = true; return; }
   if (!isJumping) {
-    luigiVY = JUMP_FORCE;
+    catVY = JUMP_FORCE;
     isJumping = true;
     isDucking = false;
     sfxJump();
