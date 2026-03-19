@@ -180,15 +180,7 @@ export function start(canvas: HTMLCanvasElement, difficulty: 'easy' | 'medium' |
   canvasRef = canvas;
   baseDifficulty = difficulty;
 
-  // Compute block size to fill canvas nicely
-  const parent = canvas.parentElement;
-  const availW = parent ? parent.clientWidth - 20 : 380;
-  const availH = parent ? parent.clientHeight - 20 : 500;
-  const blockFromW = Math.floor(availW / COLS);
-  const blockFromH = Math.floor((availH - HUD_HEIGHT) / ROWS);
-  BLOCK = Math.min(blockFromW, blockFromH, 32);
-  BLOCK = Math.max(BLOCK, 16); // minimum block size
-
+  BLOCK = 26;
   canvas.width = COLS * BLOCK + 20;
   canvas.height = ROWS * BLOCK + HUD_HEIGHT + 10;
   init();
