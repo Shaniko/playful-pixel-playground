@@ -16,7 +16,7 @@ let touchStartHandler: (e: TouchEvent) => void;
 let touchEndHandler: (e: TouchEvent) => void;
 let touchStartY: number;
 
-let catY: number, catVY: number, isJumping: boolean, isDucking: boolean;
+let luigiY: number, luigiVY: number, isJumping: boolean, isDucking: boolean;
 let obstacles: { x: number; w: number; h: number; type: 'cactus' | 'bird'; birdY: number }[];
 let clouds: { x: number; y: number; w: number }[];
 let groundOffset: number;
