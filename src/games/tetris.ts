@@ -4,7 +4,7 @@ import { getTheme } from './theme';
 const COLS = 10;
 const ROWS = 20;
 const HUD_HEIGHT = 44;
-const PADDING = 10;
+let BLOCK = 22;
 
 const COLORS = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899'];
 
